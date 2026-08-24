@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" fill="none">
+  <rect width="1200" height="630" fill="#050A0F"/>
+  <rect x="40" y="40" width="1120" height="550" fill="none" stroke="#00D4FF" stroke-opacity="0.25" stroke-width="1.5"/>
+  <text x="600" y="270" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="96" font-weight="600" fill="#F5F7FA" letter-spacing="14">COMMAND CENTER</text>
+  <text x="600" y="345" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="34" font-weight="300" fill="#C9A96E" letter-spacing="16">GRAND INAUGURATION</text>
+  <text x="600" y="400" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" fill="#8B98A5" letter-spacing="6">PT KRAKATAU TIRTA INDUSTRI</text>
+  <text x="600" y="455" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#8B98A5">29 AGUSTUS 2026</text>
+</svg>

@@ -1,0 +1,8 @@
+▲ Next.js 16.3.1
+- Local:         http://localhost:3000
+- Network:       http://192.168.105.25:3000
+✓ Ready in 223ms
+⚠ Warning: Next.js ignored package-lock.json in C:\Users\CTRLCLIENTSCADAPP because it is outside the current Git repository (C:\Users\CTRLCLIENTSCADAPP\Documents\Project\Peresmian).
+ To use this directory, set `outputFileTracingRoot` in your Next.js config.
+
+✓ Running next.config.ts took 67ms
