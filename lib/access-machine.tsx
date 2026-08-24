@@ -190,8 +190,8 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   // Event page: user scrolls through sections, then cinematic plays
   useEffect(() => {
     if (a.state !== "event") return;
-    // Give user time to view event page (30s), then auto-transition to cinematic
-    const timer = window.setTimeout(() => dispatch({ type: "TO_CINEMATIC" }), 30000);
+    // Give user time to view event page (3s), then auto-transition to cinematic
+    const timer = window.setTimeout(() => dispatch({ type: "TO_CINEMATIC" }), 3000);
     return () => window.clearTimeout(timer);
   }, [a.state]);
 

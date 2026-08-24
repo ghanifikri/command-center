@@ -93,25 +93,25 @@ report.granted = true;
 report.correctPin = true;
 console.log("[stage] granted shown");
 
-// Wait for SystemActivation (6 systems) + Event page (30s auto) + CinematicTransition to complete
+// Wait for SystemActivation (6 systems) + Event page (3s auto) + CinematicTransition to complete
 // SystemActivation: 6 systems × 2.3s = ~13.8s
-// Event page auto-transition: 30s
+// Event page auto-transition: 3s
 // CinematicTransition: 1.6s + 2s + video (~8s) = ~11.6s
-// Total: ~55s, use 80s buffer
+// Total: ~28s, use 40s buffer
 // Poll state every 5s during wait, also check cinematic phases
-console.log("[test] Starting 80s wait at:", Date.now());
+console.log("[test] Starting 40s wait at:", Date.now());
 let whiteBoxSeen = false;
-for (let i = 0; i < 16; i++) {
+for (let i = 0; i < 8; i++) {
   await page.waitForTimeout(5000);
   const state = await page.evaluate(() => window.__ACCESS_STATE || "unknown");
   console.log(`[test] ${(i+1)*5}s: state =`, state);
-  // Check for white box during cinematic (done phase ~61-64s)
+  // Check for white box during cinematic (done phase ~26-29s)
   if (state === "cinematic") {
     const hasWhiteBox = await page.evaluate(() => !!document.querySelector('[class*="white"], [style*="bg-white"]'));
     if (hasWhiteBox) whiteBoxSeen = true;
   }
 }
-console.log("[test] Finished 80s wait at:", Date.now());
+console.log("[test] Finished 40s wait at:", Date.now());
 console.log("[test] White box seen during cinematic:", whiteBoxSeen);
 
 // Check final state - verify cinematic completed (video played)
