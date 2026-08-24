@@ -10,7 +10,7 @@ const DEBUG_PIN = "280296";
 
 /** Dev-only harness: shows the live machine state and steps it from the outside. */
 function DebugBody() {
-  const { state, pin, dialogOpen, openModal, closeModal, press, completeVoice, completeActivation, completeTransition, toEvent } = useAccess();
+  const { state, pin, dialogOpen, openModal, closeModal, press, completeVoice, completeActivation, toCinematic } = useAccess();
   const [log, setLog] = useState<string[]>([]);
 
   useEffect(() => {
@@ -26,8 +26,7 @@ function DebugBody() {
       // Step the ceremony forward regardless of the timer chain.
       completeVoice();
       completeActivation();
-      completeTransition();
-      toEvent();
+      toCinematic();
     } else {
       press(k);
     }

@@ -36,18 +36,14 @@ export default function Experience() {
         )}
       </AnimatePresence>
 
-
-{/* Ceremony layers — one screen per machine state, mounted directly.
-      No AnimatePresence exit here: each screen animates in on mount and the
-      layer swap is abrupt-but-dark, which reads as a deliberate hard cut
-      between ceremonial beats rather than a lingering crossfade that can
-      leave a stuck fullscreen overlay. */}
+      {/* Ceremony layers — one screen per machine state, mounted directly.
+          No AnimatePresence exit here: each screen animates in on mount and the
+          layer swap is abrupt-but-dark, which reads as a deliberate hard cut
+          between ceremonial beats rather than a lingering crossfade that can
+          leave a stuck fullscreen overlay. */}
       <AccessModal />
       {state === "granted" && <AccessGranted />}
       {state === "voice" && <SystemActivation />}
-      {(state === "activation" || state === "transition") && (
-        <CinematicTransition />
-      )}
 
       {/* Event layer */}
       {showEvent && (
@@ -63,6 +59,9 @@ export default function Experience() {
           </motion.div>
         </ErrorBoundary>
       )}
+
+      {/* Cinematic layer — plays after event page */}
+      {state === "cinematic" && <CinematicTransition />}
     </>
   );
 }

@@ -17,7 +17,7 @@ function check(name: string, cond: boolean) {
 
 const code = "280296".split("");
 
-// Happy path: open → type code → verify → grant → ceremony → event.
+// Happy path: open → type code → verify → grant → ceremony → event → cinematic.
 const happy = drive([
   { type: "OPEN_MODAL" },
   { type: "SET_PIN", pin: code.join("") },
@@ -25,10 +25,10 @@ const happy = drive([
   { type: "GRANTED" },
   { type: "VOICE_DONE" },
   { type: "ACTIVATION_DONE" },
-  { type: "TRANSITION_DONE" },
   { type: "TO_EVENT" },
+  { type: "TO_CINEMATIC" },
 ]);
-check("happy path reaches event", happy.state === "event" && happy.dialogOpen === false);
+check("happy path reaches cinematic", happy.state === "cinematic" && happy.dialogOpen === false);
 
 // Wrong PIN: verify → denied → auto-retry clears pin back to 'pin'.
 const wrong = drive([
@@ -67,7 +67,16 @@ const noop6 = drive([
   { type: "VERIFY" },
   { type: "TO_EVENT" },
 ]);
-check("cannot enter event before transition", noop6.state === "verifying");
+check("cannot enter event before activation", noop6.state === "verifying");
+const noop7 = drive([
+  { type: "OPEN_MODAL" },
+  { type: "SET_PIN", pin: code.join("") },
+  { type: "VERIFY" },
+  { type: "GRANTED" },
+  { type: "VOICE_DONE" },
+  { type: "TO_CINEMATIC" },
+]);
+check("cannot skip to cinematic before event", noop7.state === "voice");
 
 if (failed === 0) {
   console.log("access machine: all checks passed");

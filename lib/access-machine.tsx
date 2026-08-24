@@ -28,8 +28,7 @@ interface AccessContextValue extends AccessStateShape {
   submit: () => void;
   completeVoice: () => void;
   completeActivation: () => void;
-  completeTransition: () => void;
-  toEvent: () => void;
+  toCinematic: () => void;
   press: (key: string) => void;
 }
 
@@ -101,9 +100,9 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     if (a.state !== "granted") return;
     sound.play("success");
     schedule(() => sound.playVoice("granted"), 450);
-    schedule(() => sound.playVoice("welcome"), 13500);
+    schedule(() => sound.playVoice("welcome"), 15500);
     // schedule(() => sound.playVoice("moment"), 5000);
-    schedule(() => sound.playVoice("closing"), 16500);
+    schedule(() => sound.playVoice("closing"), 17500);
     schedule(() => sound.playVoice("future"), 19500);
     schedule(() => dispatch({ type: "VOICE_DONE" }), 1600);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -112,7 +111,10 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   // Stable dispatchers — never churn dependents (SystemActivation, transitions
   // and other effect-driven flow components rely on these identities).
   const dispatchStable = useCallback(
-    (action: AccessAction) => dispatch(action),
+    (action: AccessAction) => {
+      console.log("[access-machine] dispatchStable:", action.type, "current state:", a.state);
+      dispatch(action);
+    },
     [],
   );
   const completeVoice = useCallback(
@@ -123,14 +125,9 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     () => dispatchStable({ type: "ACTIVATION_DONE" }),
     [dispatchStable],
   );
-  // completeTransition now dispatches TRANSITION_DONE (activation -> transition)
-  const completeTransition = useCallback(
-    () => dispatchStable({ type: "TRANSITION_DONE" }),
-    [dispatchStable],
-  );
-  // toEvent dispatches TO_EVENT (transition -> event)
-  const toEvent = useCallback(
-    () => dispatchStable({ type: "TO_EVENT" }),
+  // toCinematic dispatches TO_CINEMATIC (event -> cinematic)
+  const toCinematic = useCallback(
+    () => dispatchStable({ type: "TO_CINEMATIC" }),
     [dispatchStable],
   );
 
@@ -164,25 +161,37 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a.state, a.pin]);
 
+  // Expose state for debugging
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      (window as any).__ACCESS_STATE = a.state;
+    }
+  }, [a.state]);
+
   // Reduced motion: skip the long ceremony and jump straight to the event.
   useEffect(() => {
-    if (!prefersReducedMotion()) return;
+    const reduced = prefersReducedMotion();
+    console.log("[access-machine] reduced motion check:", reduced, "state:", a.state);
+    if (!reduced) return;
     if (a.state === "granted" || a.state === "voice")
       dispatch({ type: "ACTIVATION_DONE" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a.state]);
   useEffect(() => {
-    if (!prefersReducedMotion()) return;
-    if (a.state === "activation" || a.state === "transition")
-      dispatch({ type: "TO_EVENT" });
+    const reduced = prefersReducedMotion();
+    console.log("[access-machine] reduced motion check 2:", reduced, "state:", a.state);
+    if (!reduced) return;
+    if (a.state === "activation" || a.state === "event")
+      dispatch({ type: "TO_CINEMATIC" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a.state]);
 
-  // Auto-advance from transition to event after cinematic transition completes
-  // CinematicTransition: lattice 1.6s + zoom 2s + video ~8s = ~12s total
+  // Auto-advance from event to cinematic after event page is viewed
+  // Event page: user scrolls through sections, then cinematic plays
   useEffect(() => {
-    if (a.state !== "transition") return;
-    const timer = window.setTimeout(() => dispatch({ type: "TO_EVENT" }), 13000);
+    if (a.state !== "event") return;
+    // Give user time to view event page (30s), then auto-transition to cinematic
+    const timer = window.setTimeout(() => dispatch({ type: "TO_CINEMATIC" }), 30000);
     return () => window.clearTimeout(timer);
   }, [a.state]);
 
@@ -205,8 +214,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
         submit,
         completeVoice,
         completeActivation,
-        completeTransition,
-        toEvent,
+        toCinematic,
         press: (key: string) => {
           if (key === "back") backspace();
           else if (key === "ok") submit();

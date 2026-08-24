@@ -27,6 +27,7 @@ export default function SystemActivation() {
 
   // Reveal one system row every 460ms with initializing animation
   useEffect(() => {
+    console.log("[SystemActivation] Effect started, active:", active);
     setCount(0);
     setReady(false);
     setInitializingIndex(-1);
@@ -36,6 +37,7 @@ export default function SystemActivation() {
     let finished = false;
 
     const finish = () => {
+      console.log("[SystemActivation] finish() called");
       sound.play("success");
       window.setTimeout(() => setReady(true), 300);
       window.setTimeout(() => completeActivation(), 1000);

@@ -66,8 +66,9 @@ export function accessReducer(
       if (prev.state !== "verifying") return prev;
       return { ...prev, state: "granted", dialogOpen: false };
     case "VOICE_DONE":
-      if (prev.state !== "granted" && prev.state !== "voice") return prev;
-      return { ...prev, state: "voice" };
+      if (prev.state === "granted") return { ...prev, state: "voice" };
+      if (prev.state === "voice") return { ...prev, state: "activation" };
+      return prev;
     case "ACTIVATION_DONE":
       if (prev.state !== "voice" && prev.state !== "activation") return prev;
       return { ...prev, state: "event" };
