@@ -34,16 +34,16 @@ export default function CinematicTransition() {
     const t1 = window.setTimeout(() => setPhase("zoom"), 1600);
     // Phase 2: Zoom into white light ~2s
     const t2 = window.setTimeout(() => setPhase("video"), 3600);
-    // Phase 3: Video plays ~8s then done
-    const t3 = window.setTimeout(() => {
-      setPhase("done");
-    }, 11000);
+    // Phase 3: Video plays then pauses on last frame — NO auto-transition to done
+    // const t3 = window.setTimeout(() => {
+    //   setPhase("done");
+    // }, 11000);
 
     return () => {
       armed.current = false; // Allow re-arm on remount (React 18 strict mode)
       window.clearTimeout(t1);
       window.clearTimeout(t2);
-      window.clearTimeout(t3);
+      // window.clearTimeout(t3);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -64,25 +64,18 @@ export default function CinematicTransition() {
       });
     }
 
-    const onEnded = () => {
-      console.log("[CinematicTransition] Video ended");
-      if (phase === "video") {
-        setPhase("done");
-      }
-    };
-    video.addEventListener("ended", onEnded);
-
     // Fallback: if video doesn't end (e.g., loop or error), transition after 8s
-    const fallbackTimer = window.setTimeout(() => {
-      console.log("[CinematicTransition] Fallback timer fired");
-      if (phase === "video") {
-        setPhase("done");
-      }
-    }, 8000);
+    // REMOVED: video now pauses on last frame and stays there indefinitely
+    // const fallbackTimer = window.setTimeout(() => {
+    //   console.log("[CinematicTransition] Fallback timer fired");
+    //   if (phase === "video") {
+    //     setPhase("done");
+    //   }
+    // }, 8000);
 
     return () => {
-      video.removeEventListener("ended", onEnded);
-      window.clearTimeout(fallbackTimer);
+      // video.removeEventListener("ended", onEnded);
+      // window.clearTimeout(fallbackTimer);
     };
   }, [phase]);
 
@@ -168,6 +161,12 @@ export default function CinematicTransition() {
               autoPlay
               preload="auto"
               disablePictureInPicture
+              onEnded={(e) => {
+                const video = e.currentTarget;
+                video.pause();
+                // Seek to last frame (duration - small epsilon)
+                video.currentTime = video.duration - 0.1;
+              }}
             >
               <source src="/video/command-center-drone-ai.mp4" type="video/mp4" />
             </video>
@@ -177,7 +176,7 @@ export default function CinematicTransition() {
         )}
 
         {/* Phase 4: Done - hold white for a moment then could transition if needed */}
-        {phase === "done" && (
+        {/* {phase === "done" && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 1 }}
@@ -191,7 +190,7 @@ export default function CinematicTransition() {
               transition={{ duration: 1.5, ease: easeInOut }}
             />
           </motion.div>
-        )}
+        )} */}
       </motion.div>
     </AnimatePresence>
   );
