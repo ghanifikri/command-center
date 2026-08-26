@@ -25,7 +25,7 @@ export default function InaugurationButton({ label, onStart, enabled }: Props) {
       transition={{ duration: 0.6, ease: [0.22, 0.61, 0.36, 1], delay: 0.1 }}
       whileTap={{ scale: 0.97 }}
       aria-label={`${label} — enter the Command Center inauguration`}
-      className="group relative inline-flex items-center gap-3 rounded-full border border-[#00D4FF]/40 bg-[#0B141C]/40 px-7 py-3.5 text-[0.72rem] font-medium uppercase tracking-[0.3em] text-[#F5F7FA] backdrop-blur-sm transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00D4FF] hover:border-[#00D4FF]/70 disabled:cursor-wait"
+      className="group relative inline-flex items-center gap-4 rounded-full border border-[#00D4FF]/40 bg-[#0B141C]/40 px-10 py-5 text-sm font-black uppercase tracking-[0.32em] text-[#F5F7FA] backdrop-blur-sm transition-shadow focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00D4FF] hover:border-[#00D4FF]/70 disabled:cursor-wait"
       style={{ boxShadow: "0 0 0 rgba(0,212,255,0)" }}
       whileHover={{ boxShadow: "0 0 26px rgba(0,212,255,0.28)" }}
     >

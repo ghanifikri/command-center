@@ -140,7 +140,7 @@ export default function CinematicTransition() {
               className="w-32 h-32 rounded-[24px] bg-white/90 shadow-[0_0_120px_40px_rgba(255,255,255,0.8),0_0_200px_80px_rgba(0,212,255,0.4)]"
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.8, ease: easeOut }}
+              transition={{ duration: 0.5, ease: easeOut }}
             />
           </motion.div>
         )}

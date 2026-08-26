@@ -39,7 +39,7 @@ export default function Landing() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: EASE, delay: 0.35 }}
-          className="mb-6 text-[0.7rem] font-medium uppercase tracking-[0.42em] text-[#00D4FF]"
+          className="mb-6 text-[0.7rem] font-black uppercase tracking-[0.42em] text-[#00D4FF]"
         >
           {landing.label}
         </motion.p>
@@ -48,7 +48,7 @@ export default function Landing() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.9, ease: EASE, delay: 0.45 }}
-          className="font-display text-[clamp(2.6rem,8vw,5.6rem)] font-light uppercase leading-[0.95] tracking-[0.08em] text-[#F5F7FA]"
+          className="font-display text-[clamp(2.6rem,8vw,5.6rem)] font-black uppercase leading-[0.95] tracking-[0.08em] text-[#F5F7FA]"
         >
           {landing.title}
         </motion.h1>

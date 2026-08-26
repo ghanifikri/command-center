@@ -59,7 +59,7 @@ export const authSeq = {
   progress3: "AUTHENTICATING COMMAND CENTER…",
   granted: "ACCESS",
   grantedState: "GRANTED",
-  durationMs: 1400,
+  durationMs: 2000,
 } as const;
 
 export const voice = {

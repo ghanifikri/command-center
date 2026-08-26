@@ -46,19 +46,21 @@ export default function Experience() {
       {state === "voice" && <SystemActivation />}
 
       {/* Event layer */}
-      {showEvent && (
-        <ErrorBoundary>
-          <motion.div
-            key="event"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8 }}
-            className="min-h-screen bg-[#050A0F]"
-          >
-            <EventExperience />
-          </motion.div>
-        </ErrorBoundary>
-      )}
+            {showEvent && (
+              <ErrorBoundary>
+                <motion.div
+                  key="event"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.8 }}
+                  className="min-h-screen bg-[#050A0F]"
+                >
+                  {/* Background video — same semi-transparent landing video continues through event page */}
+                  <VideoHero />
+                  <EventExperience />
+                </motion.div>
+              </ErrorBoundary>
+            )}
 
       {/* Cinematic layer — plays after event page */}
       {state === "cinematic" && <CinematicTransition />}

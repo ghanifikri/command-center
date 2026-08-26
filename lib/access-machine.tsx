@@ -103,7 +103,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     schedule(() => sound.playVoice("welcome"), 15500);
     // schedule(() => sound.playVoice("moment"), 5000);
     schedule(() => sound.playVoice("closing"), 17500);
-    schedule(() => sound.playVoice("future"), 19500);
+    schedule(() => sound.playVoice("future"), 20800);
     schedule(() => dispatch({ type: "VOICE_DONE" }), 1600);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a.state]);
