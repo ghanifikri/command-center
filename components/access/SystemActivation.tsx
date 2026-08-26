@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import VideoHero from "@/components/hero/VideoHero";
 import { activation } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
 import { useSound } from "@/lib/sound";
@@ -125,6 +126,8 @@ export default function SystemActivation() {
           transition={{ duration: 0.5 }}
           aria-live="polite"
         >
+          {/* Background video — same semi-transparent landing video */}
+          <VideoHero />
           <motion.h2
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -156,7 +159,7 @@ export default function SystemActivation() {
                   >
                     {sys.label}
                   </motion.span>
-                  
+
                   {/* Center area - loading bar replaces dotted line during initialization */}
                   <AnimatePresence mode="wait">
                     {isInitializing && (
@@ -205,7 +208,7 @@ export default function SystemActivation() {
                       />
                     )}
                   </AnimatePresence>
-                  
+
                   {/* Right side - status */}
                   <AnimatePresence mode="wait">
                     {isDone && !isVisuallyDone && (

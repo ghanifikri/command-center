@@ -21,10 +21,8 @@ export default function VideoHero() {
       window.matchMedia("(max-width: 767px)").matches;
 
     if (!prefersReducedMotion()) {
-      // Probe for the video file (desktop or mobile variant).
-      const src = isMobile
-        ? "/video/command-center-profile-mobile.mp4"
-        : "/video/command-center-profile.mp4";
+      // Use background.mp4 as the landing page background video
+      const src = "/video/background.mp4";
       fetch(src, { method: "HEAD" })
         .then((r) => r.ok && setMedia({ src, poster }))
         .catch(() => setMedia({ poster }));
@@ -53,6 +51,7 @@ export default function VideoHero() {
           playsInline
           preload="auto"
           aria-hidden="true"
+          style={{ opacity: 0.35 }}
           onError={() => {
             setFailed(true);
             setMedia((m) => ({ poster: m.poster }));

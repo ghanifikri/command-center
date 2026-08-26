@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import VideoHero from "@/components/hero/VideoHero";
 import { authSeq } from "@/data/event";
 import { EASE } from "@/lib/motion";
 /**
@@ -19,6 +20,8 @@ export default function AccessGranted() {
       aria-live="polite"
       aria-label="Access granted"
     >
+      {/* Background video — same semi-transparent landing video */}
+      <VideoHero />
       {/* Scan line sweep — subtle, not a dashboard widget. */}
       <motion.div
         aria-hidden="true"
