@@ -11,7 +11,8 @@ export type SoundName =
   | "verifying"
   | "launchArm"
   | "launchIgnite"
-  | "hoverChirp";
+  | "hoverChirp"
+  | "gateDecompress";
 
 /**
  * Modular sound system.
@@ -145,6 +146,47 @@ function useAudioEngine() {
         laserOsc.connect(laserGain).connect(c.destination);
         laserOsc.start(t0);
         laserOsc.stop(t0 + 0.42);
+        return;
+      }
+
+      if (name === "gateDecompress") {
+        // Heavy pneumatic blast door hiss & deep hydraulic motorized hum
+        const t0 = c.currentTime;
+
+        // 1. Pneumatic pressure release hiss
+        const bufferSize = Math.floor(c.sampleRate * 0.85);
+        const noiseBuffer = c.createBuffer(1, bufferSize, c.sampleRate);
+        const output = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+        const whiteNoise = c.createBufferSource();
+        whiteNoise.buffer = noiseBuffer;
+
+        const filter = c.createBiquadFilter();
+        filter.type = "bandpass";
+        filter.frequency.setValueAtTime(1400, t0);
+        filter.frequency.exponentialRampToValueAtTime(280, t0 + 0.75);
+
+        const noiseGain = c.createGain();
+        noiseGain.gain.setValueAtTime(0.09, t0);
+        noiseGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.8);
+
+        whiteNoise.connect(filter).connect(noiseGain).connect(c.destination);
+        whiteNoise.start(t0);
+        whiteNoise.stop(t0 + 0.82);
+
+        // 2. Sub-hydraulic mechanical slide drone
+        const motorOsc = c.createOscillator();
+        const motorGain = c.createGain();
+        motorOsc.type = "sawtooth";
+        motorOsc.frequency.setValueAtTime(68, t0);
+        motorOsc.frequency.linearRampToValueAtTime(38, t0 + 1.2);
+        motorGain.gain.setValueAtTime(0.07, t0);
+        motorGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 1.2);
+        motorOsc.connect(motorGain).connect(c.destination);
+        motorOsc.start(t0);
+        motorOsc.stop(t0 + 1.25);
         return;
       }
 

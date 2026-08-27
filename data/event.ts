@@ -103,12 +103,12 @@ export const activation = {
   init: "INITIALIZING COMMAND CENTER",
   config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1000 },
-    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 100 },
-    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 100 },
-    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 100 },
-    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 100 },
-    { label: "AI", dots: 10, status: "ONLINE", durationMs: 100 },
+    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1 },
+    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 1 },
+    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 1 },
+    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 1 },
+    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 1 },
+    { label: "AI", dots: 10, status: "ONLINE", durationMs: 1 },
   ] as const,
   ready: "ALL SYSTEMS READY", 
 } as const;
