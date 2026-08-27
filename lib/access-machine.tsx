@@ -197,11 +197,13 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   }, [a.state]);
 
   // Auto-advance from event to cinematic after event page is viewed
-  // Event page: user scrolls through sections, then cinematic plays
+  // Event page: user views the majestic inauguration page, then auto-transition to cinematic
   useEffect(() => {
     if (a.state !== "event") return;
-    // Give user time to view event page (3s), then auto-transition to cinematic
-    const timer = window.setTimeout(() => dispatch({ type: "TO_CINEMATIC" }), 3000);
+    const timer = window.setTimeout(
+      () => dispatch({ type: "TO_CINEMATIC" }),
+      activationConfig.eventPageDurationMs ?? 5000,
+    );
     return () => window.clearTimeout(timer);
   }, [a.state]);
 

@@ -87,18 +87,20 @@ export const activationConfig = {
   stepBufferMs: 300,
   /** Jeda tampilan 'ALL SYSTEMS READY' sebelum beralih ke halaman utama (ms) */
   readyDelayMs: 2000,
+  /** Durasi tampilan halaman utama event sebelum transisi otomatis ke sinematik (ms) */
+  eventPageDurationMs: 5000,
 } as const;
 
 export const activation = {
   init: "INITIALIZING COMMAND CENTER",
   config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1100 },
-    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 1400 },
-    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 1100 },
-    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 1100 },
-    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 1100 },
-    { label: "AI", dots: 10, status: "ONLINE", durationMs: 1100 },
+    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 100 },
+    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 100 },
+    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 100 },
+    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 100 },
+    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 100 },
+    { label: "AI", dots: 10, status: "ONLINE", durationMs: 100 },
   ] as const,
   ready: "ALL SYSTEMS READY", 
 } as const;
