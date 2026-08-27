@@ -5,7 +5,7 @@ import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
 import { X, ShieldCheck, Lock } from "lucide-react";
 import PinIndicator from "@/components/access/PinIndicator";
 import PinPad from "@/components/access/PinPad";
-import { secureAccess, authSeq } from "@/data/event";
+import { access, secureAccess, authSeq } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
 import { easeOut } from "@/lib/motion";
 
@@ -39,10 +39,10 @@ export default function AccessModal() {
     function onKeyDown(e: KeyboardEvent) {
       if (state !== "pin" && state !== "denied") return;
       if (e.key >= "0" && e.key <= "9") {
-        if (pin.length < 6) press(e.key);
+        if (pin.length < access.codeLength) press(e.key);
       } else if (e.key === "Backspace") {
         press("back");
-      } else if (e.key === "Enter" && pin.length === 6) {
+      } else if (e.key === "Enter" && pin.length === access.codeLength) {
         submit();
       } else if (e.key === "Escape") {
         closeModal();

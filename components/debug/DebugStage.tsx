@@ -4,8 +4,9 @@ import { useEffect, useState } from "react";
 import ProviderTree from "@/components/ProviderTree";
 import { useAccess } from "@/lib/access-machine";
 import AccessModal from "@/components/access/AccessModal";
+import { access } from "@/data/event";
 
-const DEBUG_PIN = "280296";
+const DEBUG_PIN = access.code;
 /* Debug harness — exercises the live machine but renders no ceremony layers. */
 
 /** Dev-only harness: shows the live machine state and steps it from the outside. */

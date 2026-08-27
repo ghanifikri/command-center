@@ -15,10 +15,12 @@ export const event = {
   tagline: "A New Chapter of Integrated Excellence",
 } as const;
 
+export const ACCESS_PIN = "111111";
+
 export const access = {
   enabled: true,
-  codeLength: 6 as const,
-  code: "280296",
+  codeLength: ACCESS_PIN.length,
+  code: ACCESS_PIN,
   label: "Secure Access",
   system: "Command Center",
   /** Not a real security boundary — documented per event-content.md. */
@@ -42,8 +44,8 @@ export const secureAccess = {
   status: access.label,
   system: access.system,
   heading: "AUTHORIZATION REQUIRED",
-  prompt: "ENTER 6-DIGIT ACCESS CODE",
-  placeholders: 6,
+  prompt: `ENTER ${access.code.length}-DIGIT ACCESS CODE`,
+  placeholders: access.code.length,
   keypad: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "back", "0", "ok"],
   wrongPin: {
     title: "ACCESS DENIED",

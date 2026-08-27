@@ -8,7 +8,7 @@ import {
   useReducer,
   useRef,
 } from "react";
-import { authSeq, voice } from "@/data/event";
+import { access, authSeq, voice } from "@/data/event";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useSound } from "@/lib/sound";
 import {
@@ -49,7 +49,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
 
   const inputDigit = useCallback(
     (d: string) => {
-      if (d.length !== 1 || a.pin.length >= 6) return;
+      if (d.length !== 1 || a.pin.length >= access.codeLength) return;
       dispatch({ type: "SET_PIN", pin: a.pin + d });
       sound.play("beep");
     },
@@ -63,7 +63,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   }, [a.pin, sound]);
 
   const submit = useCallback(() => {
-    if (a.state !== "pin" || a.pin.length !== 6) return;
+    if (a.state !== "pin" || a.pin.length !== access.codeLength) return;
     dispatch({ type: "VERIFY" });
   }, [a.pin, a.state]);
 
@@ -73,7 +73,7 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     if (a.state !== "verifying") return;
     sound.play("authenticate");
     sound.startVerifying();
-    const ok = a.pin === "280296";
+    const ok = a.pin === access.code;
     schedule(
       () => {
         sound.stopVerifying();

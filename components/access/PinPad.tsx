@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 import { Delete, Check } from "lucide-react";
-import { secureAccess } from "@/data/event";
+import { access, secureAccess } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
 import { cn } from "@/lib/cn";
 import { EASE } from "@/lib/motion";
@@ -28,7 +28,7 @@ const KEY_SUBTEXT: Record<string, string> = {
 export default function PinPad() {
   const { press, pin } = useAccess();
   const keys = secureAccess.keypad; // ["1", "2", "3", "4", "5", "6", "7", "8", "9", "back", "0", "ok"]
-  const isReadyToSubmit = pin.length === 6;
+  const isReadyToSubmit = pin.length === access.codeLength;
 
   const renderKey = (key: Key) => {
     const isBack = key === "back";

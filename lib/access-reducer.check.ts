@@ -3,6 +3,7 @@
  * Run: npx tsx lib/access-reducer.check.ts
  */
 import { accessReducer, initialAccessState, type AccessAction } from "./access-reducer";
+import { ACCESS_PIN } from "../data/event";
 
 function drive(actions: AccessAction[]) {
   return actions.reduce(accessReducer, initialAccessState);
@@ -15,7 +16,7 @@ function check(name: string, cond: boolean) {
   console.error(`FAIL: ${name}`);
 }
 
-const code = "280296".split("");
+const code = ACCESS_PIN.split("");
 
 // Happy path: open → type code → verify → grant → ceremony → event → cinematic.
 const happy = drive([
