@@ -100,10 +100,20 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     if (a.state !== "granted") return;
     sound.play("success");
     schedule(() => sound.playVoice("granted"), 450);
-    schedule(() => sound.playVoice("welcome"), 15500);
-    // schedule(() => sound.playVoice("moment"), 5000);
-    schedule(() => sound.playVoice("closing"), 17500);
-    schedule(() => sound.playVoice("future"), 20800);
+
+    const systemsTotalMs = activation.systems.reduce(
+      (sum, sys) =>
+        sum +
+        ((sys as { durationMs?: number }).durationMs ?? activationConfig.stepDurationMs) +
+        activationConfig.stepBufferMs,
+      0,
+    );
+
+    const welcomeTime = authSeq.grantedDurationMs + systemsTotalMs;
+    schedule(() => sound.playVoice("welcome"), welcomeTime);
+    schedule(() => sound.playVoice("closing"), welcomeTime + 2000);
+    schedule(() => sound.playVoice("future"), welcomeTime + 5300);
+
     schedule(() => dispatch({ type: "VOICE_DONE" }), authSeq.grantedDurationMs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [a.state]);
@@ -199,7 +209,13 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (a.state !== "voice") return;
     const totalDuration =
-      (activationConfig.stepDurationMs + activationConfig.stepBufferMs) * activation.systems.length +
+      activation.systems.reduce(
+        (sum, sys) =>
+          sum +
+          ((sys as { durationMs?: number }).durationMs ?? activationConfig.stepDurationMs) +
+          activationConfig.stepBufferMs,
+        0,
+      ) +
       activationConfig.readyDelayMs +
       3000;
     const timer = window.setTimeout(() => dispatch({ type: "ACTIVATION_DONE" }), totalDuration);

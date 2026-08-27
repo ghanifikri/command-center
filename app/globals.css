@@ -18,6 +18,8 @@
 html {
   scroll-behavior: smooth;
   background: #050a0f;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 body {
@@ -26,6 +28,20 @@ body {
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Global scrollbar hiding for WebKit (Chrome, Safari, Edge, Opera) */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+* {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
 }
 
 ::selection {

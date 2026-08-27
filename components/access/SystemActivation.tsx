@@ -38,10 +38,11 @@ export default function SystemActivation() {
     let finished = false;
 
     const finish = () => {
-      console.log("[SystemActivation] finish() called");
+      console.log("[SystemActivation] finish() called - all systems filled 100%");
       sound.play("success");
-      window.setTimeout(() => setReady(true), 300);
-      window.setTimeout(() => completeActivation(), activationConfig.readyDelayMs);
+      setReady(true);
+      const t = window.setTimeout(() => completeActivation(), activationConfig.readyDelayMs);
+      timeoutsRef.current.push(t);
     };
 
     const animateProgress = (index: number, onComplete: () => void) => {
@@ -174,20 +175,19 @@ export default function SystemActivation() {
             {/* System rows */}
             <ul className="w-full space-y-3 font-mono text-sm">
               {activation.systems.map((sys, i) => {
-                const isDone = i < count;
-                const isInitializing = i === initializingIndex;
-                const isPending = i > count && !isInitializing;
                 const isVisuallyDone = systemDone.has(i);
+                const isInitializing = i === initializingIndex && !isVisuallyDone;
+                const isPending = !isVisuallyDone && !isInitializing;
                 const progress = systemProgress[i] ?? 0;
 
                 return (
                   <li
                     key={sys.label}
                     className={`relative flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all duration-300 ${
-                      isInitializing
-                        ? "border-[#00D4FF]/50 bg-[#00D4FF]/10 shadow-[0_0_15px_rgba(0,212,255,0.15)]"
-                        : isVisuallyDone
+                      isVisuallyDone
                         ? "border-[#00E5A0]/25 bg-[#00E5A0]/5"
+                        : isInitializing
+                        ? "border-[#00D4FF]/50 bg-[#00D4FF]/10 shadow-[0_0_15px_rgba(0,212,255,0.15)]"
                         : "border-[#1B2A36]/40 bg-[#07111D]/40 opacity-50"
                     }`}
                     aria-hidden={isPending}
@@ -201,7 +201,9 @@ export default function SystemActivation() {
 
                     {/* Center Area: Progress Bar or Connection Line */}
                     <div className="flex-1 min-w-0">
-                      {isInitializing ? (
+                      {isVisuallyDone ? (
+                        <div className="h-px w-full bg-gradient-to-r from-[#00E5A0]/30 via-[#00E5A0]/60 to-[#00E5A0]/30" />
+                      ) : isInitializing ? (
                         <div className="flex items-center gap-2">
                           <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-[#1B2A36]">
                             <motion.div
@@ -213,8 +215,6 @@ export default function SystemActivation() {
                             {Math.round(progress)}%
                           </span>
                         </div>
-                      ) : isVisuallyDone ? (
-                        <div className="h-px w-full bg-gradient-to-r from-[#00E5A0]/30 via-[#00E5A0]/60 to-[#00E5A0]/30" />
                       ) : (
                         <div className="h-px w-full border-b border-dashed border-[#2A3B4A]" />
                       )}
@@ -222,24 +222,17 @@ export default function SystemActivation() {
 
                     {/* Right Side: Status Badge */}
                     <div className="w-24 shrink-0 text-right">
-                      {isInitializing && (
-                        <span className="inline-flex items-center gap-1 rounded border border-[#00D4FF]/40 bg-[#00D4FF]/10 px-2 py-0.5 font-mono text-[0.6rem] font-bold text-[#00D4FF]">
-                          <span className="h-1 w-1 animate-pulse rounded-full bg-[#00D4FF]" />
-                          SYNC
-                        </span>
-                      )}
-                      {isDone && !isVisuallyDone && !isInitializing && (
-                        <span className="font-mono text-[0.6rem] text-[#00D4FF]">
-                          COMPLETING…
-                        </span>
-                      )}
-                      {isVisuallyDone && (
+                      {isVisuallyDone ? (
                         <span className="inline-flex items-center gap-1 rounded border border-[#00E5A0]/40 bg-[#00E5A0]/10 px-2 py-0.5 font-mono text-[0.62rem] font-bold text-[#00E5A0] shadow-[0_0_10px_rgba(0,229,160,0.2)]">
                           <span className="h-1.5 w-1.5 rounded-full bg-[#00E5A0]" />
                           {sys.status}
                         </span>
-                      )}
-                      {isPending && (
+                      ) : isInitializing ? (
+                        <span className="inline-flex items-center gap-1 rounded border border-[#00D4FF]/40 bg-[#00D4FF]/10 px-2 py-0.5 font-mono text-[0.6rem] font-bold text-[#00D4FF]">
+                          <span className="h-1 w-1 animate-pulse rounded-full bg-[#00D4FF]" />
+                          SYNC
+                        </span>
+                      ) : (
                         <span className="font-mono text-[0.58rem] tracking-wider text-[#8B98A5]/50">
                           STANDBY
                         </span>

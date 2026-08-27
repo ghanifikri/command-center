@@ -93,14 +93,14 @@ export const activation = {
   init: "INITIALIZING COMMAND CENTER",
   config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 5, status: "ONLINE" },
-    { label: "SECURITY", dots: 16, status: "ONLINE" },
-    { label: "MONITORING", dots: 14, status: "ONLINE" },
-    { label: "COMMUNICATION", dots: 12, status: "ONLINE" },
-    { label: "SYSTEM", dots: 16, status: "ONLINE" },
-    { label: "AI", dots: 10, status: "ONLINE" },
+    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1100 },
+    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 1400 },
+    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 1100 },
+    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 1100 },
+    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 1100 },
+    { label: "AI", dots: 10, status: "ONLINE", durationMs: 1100 },
   ] as const,
-  ready: "ALL SYSTEMS READY",
+  ready: "ALL SYSTEMS READY", 
 } as const;
 
 export const eventHero = {
