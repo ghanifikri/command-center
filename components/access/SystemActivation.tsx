@@ -47,7 +47,10 @@ export default function SystemActivation() {
     const animateProgress = (index: number, onComplete: () => void) => {
       let progress = 0;
       const stepIntervalMs = 50;
-      const totalSteps = Math.max(1, activationConfig.stepDurationMs / stepIntervalMs);
+      const currentDuration =
+        (activation.systems[index] as { durationMs?: number }).durationMs ??
+        activationConfig.stepDurationMs;
+      const totalSteps = Math.max(1, currentDuration / stepIntervalMs);
       const stepIncrement = 100 / totalSteps;
 
       const interval = window.setInterval(() => {
