@@ -9,21 +9,8 @@ import { EASE } from "@/lib/motion";
 
 type Key = string;
 
-const KEY_SUBTEXT: Record<string, string> = {
-  "1": "—",
-  "2": "ABC",
-  "3": "DEF",
-  "4": "GHI",
-  "5": "JKL",
-  "6": "MNO",
-  "7": "PQRS",
-  "8": "TUV",
-  "9": "WXYZ",
-  "0": "+",
-};
-
 /**
- * Balanced, modern 3x4 cybernetic keypad with micro-interactions and tactile feedback.
+ * Pure numeric 3x4 cybernetic keypad with large, clean digits and tactile feedback.
  */
 export default function PinPad() {
   const { press, pin } = useAccess();
@@ -33,7 +20,6 @@ export default function PinPad() {
   const renderKey = (key: Key) => {
     const isBack = key === "back";
     const isOk = key === "ok";
-    const subtext = KEY_SUBTEXT[key];
 
     if (isOk) {
       return (
@@ -47,7 +33,7 @@ export default function PinPad() {
             "flex h-16 w-16 sm:h-[72px] sm:w-[72px] flex-col items-center justify-center rounded-2xl border transition-all duration-200",
             isReadyToSubmit
               ? "border-[#00E5A0] bg-[#00E5A0]/20 text-[#00E5A0] shadow-[0_0_20px_rgba(0,229,160,0.4)] hover:bg-[#00E5A0]/30 hover:scale-105 cursor-pointer"
-              : "border-[#1B2A36] bg-[#07111D]/40 text-[#8B98A5]/40 opacity-40 cursor-not-allowed",
+              : "border-[#1B2A36] bg-[#07111D]/40 text-[#8B98A5]/30 opacity-35 cursor-not-allowed",
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00E5A0]"
           )}
         >
@@ -87,19 +73,14 @@ export default function PinPad() {
         whileTap={{ scale: 0.92 }}
         aria-label={`Digit ${key}`}
         className={cn(
-          "relative flex h-16 w-16 sm:h-[72px] sm:w-[72px] flex-col items-center justify-center rounded-2xl border border-[#1B2A36] bg-[#07111D]/75 backdrop-blur-md transition-all duration-200",
+          "relative flex h-16 w-16 sm:h-[72px] sm:w-[72px] items-center justify-center rounded-2xl border border-[#1B2A36] bg-[#07111D]/75 backdrop-blur-md transition-all duration-200",
           "hover:border-[#00D4FF]/60 hover:bg-[#00D4FF]/10 hover:shadow-[0_0_20px_rgba(0,212,255,0.25)] hover:scale-[1.03]",
           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00D4FF]"
         )}
       >
-        <span className="font-display text-xl sm:text-2xl font-bold tracking-tight text-[#F5F7FA]">
+        <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#F5F7FA]">
           {key}
         </span>
-        {subtext && (
-          <span className="font-mono text-[0.52rem] font-medium tracking-widest text-[#8B98A5]/60">
-            {subtext}
-          </span>
-        )}
       </motion.button>
     );
   };

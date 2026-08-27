@@ -8,7 +8,7 @@ import {
   useReducer,
   useRef,
 } from "react";
-import { access, authSeq, voice } from "@/data/event";
+import { access, activation, activationConfig, authSeq, voice } from "@/data/event";
 import { prefersReducedMotion } from "@/lib/motion";
 import { useSound } from "@/lib/sound";
 import {
@@ -198,8 +198,11 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
   // Auto-advance from voice to activation (fallback if SystemActivation doesn't complete)
   useEffect(() => {
     if (a.state !== "voice") return;
-    // 6 systems × 2.3s each = ~13.8s, plus buffer
-    const timer = window.setTimeout(() => dispatch({ type: "ACTIVATION_DONE" }), 17000);
+    const totalDuration =
+      (activationConfig.stepDurationMs + activationConfig.stepBufferMs) * activation.systems.length +
+      activationConfig.readyDelayMs +
+      3000;
+    const timer = window.setTimeout(() => dispatch({ type: "ACTIVATION_DONE" }), totalDuration);
     return () => window.clearTimeout(timer);
   }, [a.state]);
 

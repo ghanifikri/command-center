@@ -75,10 +75,23 @@ export const voice = {
     "“Access granted. Welcome to Command Center PT Krakatau Tirta Industri. Hari ini menandai langkah baru dalam perjalanan PT Krakatau Tirta Industri. The future starts here.”",
 } as const;
 
+// =========================================================================
+// CONFIG: SYSTEM ACTIVATION DURATION (Atur Durasi Animasi Aktivasi di sini)
+// =========================================================================
+export const activationConfig = {
+  /** Durasi animasi progress per baris sistem (dalam milidetik, 2000 = 2 detik) */
+  stepDurationMs: 2000,
+  /** Jeda jeda setelah baris selesai (100%) sebelum lanjut ke baris berikutnya (ms) */
+  stepBufferMs: 300,
+  /** Jeda tampilan 'ALL SYSTEMS READY' sebelum beralih ke halaman utama (ms) */
+  readyDelayMs: 2000,
+} as const;
+
 export const activation = {
   init: "INITIALIZING COMMAND CENTER",
+  config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 18, status: "ONLINE" },
+    { label: "NETWORK", dots: 5, status: "ONLINE" },
     { label: "SECURITY", dots: 16, status: "ONLINE" },
     { label: "MONITORING", dots: 14, status: "ONLINE" },
     { label: "COMMUNICATION", dots: 12, status: "ONLINE" },

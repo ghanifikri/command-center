@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import VideoHero from "@/components/hero/VideoHero";
-import { activation } from "@/data/event";
+import { activation, activationConfig } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
 import { useSound } from "@/lib/sound";
 import { easeOut } from "@/lib/motion";
@@ -26,7 +26,7 @@ export default function SystemActivation() {
   // cinematic-transition handoff (see CinematicTransition).
   const active = state === "voice";
 
-  // Reveal one system row every 460ms with initializing animation
+  // Reveal one system row with configurable duration
   useEffect(() => {
     console.log("[SystemActivation] Effect started, active:", active);
     setCount(0);
@@ -41,28 +41,30 @@ export default function SystemActivation() {
       console.log("[SystemActivation] finish() called");
       sound.play("success");
       window.setTimeout(() => setReady(true), 300);
-      window.setTimeout(() => completeActivation(), 1000);
+      window.setTimeout(() => completeActivation(), activationConfig.readyDelayMs);
     };
 
     const animateProgress = (index: number, onComplete: () => void) => {
       let progress = 0;
+      const stepIntervalMs = 50;
+      const totalSteps = Math.max(1, activationConfig.stepDurationMs / stepIntervalMs);
+      const stepIncrement = 100 / totalSteps;
+
       const interval = window.setInterval(() => {
         if (finished) return;
-        progress += 2.5; // 2.5% * 40 steps = 100% over 2000ms
+        progress += stepIncrement;
         setSystemProgress((prev) => ({ ...prev, [index]: Math.min(progress, 100) }));
         if (progress >= 100) {
           clearInterval(interval);
           // Mark this system as visually complete
           setSystemDone((prev) => new Set([...prev, index]));
-          // Wait for visual animation to complete (framer-motion transition: 2s)
-          // The interval runs for 2s, so progress reaches 100 at ~2s
-          // Add small buffer then call onComplete
+          // Add configurable buffer then call onComplete
           const buffer = window.setTimeout(() => {
             onComplete();
-          }, 300);
+          }, activationConfig.stepBufferMs);
           timeoutsRef.current.push(buffer);
         }
-      }, 50); // 50ms * 40 steps = 2000ms (2 seconds)
+      }, stepIntervalMs);
       timeoutsRef.current.push(interval);
     };
 
