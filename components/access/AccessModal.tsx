@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion, useAnimationControls } from "framer-motion";
-import { X } from "lucide-react";
+import { X, ShieldCheck, Lock } from "lucide-react";
 import PinIndicator from "@/components/access/PinIndicator";
 import PinPad from "@/components/access/PinPad";
 import { secureAccess, authSeq } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
-import { useSound } from "@/lib/sound";
+import { easeOut } from "@/lib/motion";
 
 export default function AccessModal() {
   const { state, pin, closeModal, press, submit } = useAccess();
-  const { play, playVoice } = useSound();
   const controls = useAnimationControls();
   const [progress, setProgress] = useState(0);
 
@@ -34,14 +33,6 @@ export default function AccessModal() {
       return () => clearInterval(interval);
     }
   }, [verified, controls]);
-
-  // Play success sound on granted - handled by access-machine useEffect
-  // useEffect(() => {
-  //   if (state === "granted") {
-  //     play("success");
-  //     playVoice("granted");
-  //   }
-  // }, [state, play, playVoice]);
 
   // Handle keyboard input
   useEffect(() => {
@@ -73,26 +64,39 @@ export default function AccessModal() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 flex items-center justify-center bg-[#050A0F]/70 p-4 backdrop-blur-sm"
+        className="fixed inset-0 z-50 flex items-center justify-center bg-[#050A0F]/80 p-4 backdrop-blur-md"
         role="dialog"
         aria-modal="true"
         aria-labelledby={verified ? undefined : "secure-access-title"}
         aria-describedby={verified ? undefined : "secure-access-desc"}
       >
+        {/* Ambient background glow */}
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute h-[450px] w-[450px] rounded-full bg-[#00D4FF]/15 blur-[120px]"
+        />
+
         <motion.div
-          initial={{ scale: 0.95, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.95, opacity: 0 }}
-          className="relative w-full max-w-[430px] rounded-xl border border-[#2A3B4A] bg-[#0B141C]/95 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.6)] sm:p-8"
+          initial={{ scale: 0.94, opacity: 0, y: 15 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.94, opacity: 0, y: 10 }}
+          transition={{ duration: 0.4, ease: easeOut }}
+          className="relative w-full max-w-[420px] overflow-hidden rounded-3xl border border-[#00D4FF]/30 bg-[#07111D]/90 p-6 shadow-[0_0_60px_rgba(0,212,255,0.15)] backdrop-blur-2xl sm:p-8"
         >
+          {/* Sci-Fi Corner Brackets */}
+          <div className="pointer-events-none absolute left-3 top-3 h-3.5 w-3.5 border-l-2 border-t-2 border-[#00D4FF]" />
+          <div className="pointer-events-none absolute right-3 top-3 h-3.5 w-3.5 border-r-2 border-t-2 border-[#00D4FF]" />
+          <div className="pointer-events-none absolute bottom-3 left-3 h-3.5 w-3.5 border-b-2 border-l-2 border-[#00D4FF]" />
+          <div className="pointer-events-none absolute bottom-3 right-3 h-3.5 w-3.5 border-b-2 border-r-2 border-[#00D4FF]" />
+
           {/* Close button - only show in PIN and DENIED states */}
           {(state === "pin" || state === "denied") && (
             <button
               onClick={closeModal}
-              className="absolute top-4 right-4 text-[#8B98A5] hover:text-[#F5F7FA] transition-colors"
+              className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center rounded-lg border border-[#1B2A36] bg-[#0B1724]/80 text-[#8B98A5] transition-all hover:border-[#FF4D5A]/50 hover:bg-[#FF4D5A]/10 hover:text-[#FF4D5A]"
               aria-label="Tutup"
             >
-              <X className="h-5 w-5" />
+              <X className="h-4 w-4" />
             </button>
           )}
 
@@ -101,47 +105,71 @@ export default function AccessModal() {
               key="verifying"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="py-2 text-center"
+              className="py-6 text-center"
               aria-live="polite"
             >
-              <p className="font-display text-lg uppercase tracking-[0.2em] text-[#F5F7FA]">
+              <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF] shadow-[0_0_20px_rgba(0,212,255,0.3)]">
+                <ShieldCheck className="h-7 w-7 animate-pulse" />
+              </div>
+
+              <h3 className="font-display text-xl font-bold uppercase tracking-[0.2em] text-[#F5F7FA]">
                 {authSeq.authenticating}
-              </p>
+              </h3>
+
               {/* Progress bar with percentage */}
-              <div className="mx-auto mt-5 w-80">
-                <div className="flex justify-between text-[0.7rem] font-mono text-[#00D4FF] mb-2">
-                  <span>VERIFYING ACCESS…</span>
-                  <span>{progress}%</span>
+              <div className="mx-auto mt-6 w-full max-w-[300px]">
+                <div className="mb-2 flex justify-between font-mono text-[0.68rem] text-[#00D4FF]">
+                  <span className="tracking-wider">VERIFYING ACCESS...</span>
+                  <span className="font-bold">{progress}%</span>
                 </div>
-                <div className="h-6 w-full rounded-full overflow-hidden bg-[#1B2A36]">
+                <div className="relative h-2 w-full overflow-hidden rounded-full bg-[#1B2A36]">
                   <motion.div
-                    className="h-full bg-gradient-to-r from-[#00D4FF] to-[#00E5A0] rounded-full"
+                    className="h-full rounded-full bg-gradient-to-r from-[#00D4FF] to-[#00E5A0]"
                     initial={{ width: "0%" }}
                     animate={{ width: "100%" }}
                     transition={{ duration: 1.4, ease: "easeInOut" }}
                   />
                 </div>
               </div>
-              <p className="mt-4 text-[0.6rem] uppercase tracking-[0.28em] text-[#8B98A5]">
+
+              <p className="mt-4 font-mono text-[0.62rem] uppercase tracking-[0.25em] text-[#8B98A5]">
                 {authSeq.progress1}
               </p>
             </motion.div>
           ) : (
             <motion.div key="pin" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+              {/* Header Badge */}
+              <div className="mb-2 flex items-center gap-2">
+                <div className="flex h-5 w-5 items-center justify-center rounded border border-[#00D4FF]/40 bg-[#00D4FF]/10 text-[#00D4FF]">
+                  <Lock className="h-3 w-3" />
+                </div>
+                <span className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.22em] text-[#00D4FF]">
+                  {secureAccess.status}
+                </span>
+              </div>
+
               <h2
                 id="secure-access-title"
-                className="font-display text-2xl font-medium uppercase tracking-[0.16em] text-[#F5F7FA]"
+                className="font-display text-2xl font-bold uppercase tracking-[0.12em] text-[#F5F7FA]"
               >
                 {secureAccess.system}
               </h2>
-              <p id="secure-access-desc" className="mt-2 text-[0.68rem] uppercase tracking-[0.26em] text-[#8B98A5]">
-                {secureAccess.heading}
-              </p>
-              <p className="mt-6 text-[0.62rem] uppercase tracking-[0.28em] text-[#8B98A5]">
-                {secureAccess.prompt}
+
+              <p
+                id="secure-access-desc"
+                className="mt-1 font-mono text-[0.62rem] uppercase tracking-[0.24em] text-[#8B98A5]"
+              >
+                {state === "denied" ? (
+                  <span className="font-bold text-[#FF4D5A] animate-pulse">
+                    ACCESS DENIED · INVALID CODE
+                  </span>
+                ) : (
+                  secureAccess.heading
+                )}
               </p>
 
-              <div className="mt-4 flex justify-center py-2">
+              {/* Pin Indicator */}
+              <div className="my-5">
                 <PinIndicator
                   length={secureAccess.placeholders}
                   filled={pin.length}
@@ -149,7 +177,8 @@ export default function AccessModal() {
                 />
               </div>
 
-              <div className="mt-4">
+              {/* Keypad */}
+              <div className="mt-6">
                 <PinPad />
               </div>
             </motion.div>

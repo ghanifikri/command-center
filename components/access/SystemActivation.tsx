@@ -98,28 +98,12 @@ export default function SystemActivation() {
     };
   }, [active, sound, completeActivation]);
 
-  const loadingVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { repeat: Infinity, duration: 1.2, ease: "easeInOut" as const }
-    }
-  };
-
-  const dotVariants = {
-    hidden: { opacity: 0.2 },
-    visible: {
-      opacity: 1,
-      transition: { repeat: Infinity, duration: 0.6, ease: "easeInOut" as const }
-    }
-  };
-
   return (
     <AnimatePresence>
       {active && (
         <motion.div
           key="activation"
-          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#050A0F] px-6"
+          className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-[#050A0F]/90 px-4 sm:px-6"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -128,138 +112,174 @@ export default function SystemActivation() {
         >
           {/* Background video — same semi-transparent landing video */}
           <VideoHero />
-          <motion.h2
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="mb-10 text-[0.7rem] font-medium uppercase tracking-[0.4em] text-[#8B98A5]"
+
+          {/* Ambient Glow */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute h-[400px] w-[400px] rounded-full bg-[#00D4FF]/10 blur-[120px]"
+          />
+
+          {/* HUD Command Console Card */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            transition={{ duration: 0.5, ease: easeOut }}
+            className="relative w-full max-w-lg overflow-hidden rounded-2xl border border-[#00D4FF]/25 bg-[#07111D]/85 p-6 shadow-[0_0_50px_rgba(0,212,255,0.12)] backdrop-blur-xl sm:p-8"
           >
-            {activation.init}
-          </motion.h2>
+            {/* Tech HUD Corner Brackets */}
+            <div className="pointer-events-none absolute left-2 top-2 h-3.5 w-3.5 border-l-2 border-t-2 border-[#00D4FF]" />
+            <div className="pointer-events-none absolute right-2 top-2 h-3.5 w-3.5 border-r-2 border-t-2 border-[#00D4FF]" />
+            <div className="pointer-events-none absolute bottom-2 left-2 h-3.5 w-3.5 border-b-2 border-l-2 border-[#00D4FF]" />
+            <div className="pointer-events-none absolute bottom-2 right-2 h-3.5 w-3.5 border-b-2 border-r-2 border-[#00D4FF]" />
 
-          <ul className="w-full max-w-md space-y-4 font-mono text-sm">
-            {activation.systems.map((sys, i) => {
-              const isDone = i < count;
-              const isInitializing = i === initializingIndex;
-              const isPending = i > count && !isInitializing;
-              const isVisuallyDone = systemDone.has(i);
-              const progress = systemProgress[i] ?? 0;
+            {/* Scanning radar line */}
+            <motion.div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-x-0 h-16 bg-gradient-to-b from-transparent via-[#00D4FF]/10 to-transparent"
+              initial={{ top: "-15%" }}
+              animate={{ top: "115%" }}
+              transition={{ repeat: Infinity, duration: 3, ease: "linear" }}
+            />
 
-              return (
-                <li
-                  key={sys.label}
-                  className="flex items-center gap-4 opacity-90"
-                  aria-hidden={isPending}
-                >
-                  <motion.span
-                    initial={{ opacity: 0, x: -8 }}
-                    animate={isDone || isInitializing ? { opacity: 1, x: 0 } : {}}
-                    transition={{ duration: 0.3 }}
-                    className="text-[#F5F7FA] w-24 shrink-0"
+            {/* Header */}
+            <div className="mb-6 flex items-center justify-between border-b border-[#1B2A36] pb-4">
+              <div className="flex items-center gap-2.5">
+                <span className="relative flex h-2.5 w-2.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#00D4FF] opacity-75" />
+                  <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#00D4FF]" />
+                </span>
+                <div>
+                  <h2 className="text-[0.7rem] font-bold uppercase tracking-[0.25em] text-[#F5F7FA]">
+                    {activation.init}
+                  </h2>
+                  <p className="font-mono text-[0.55rem] tracking-wider text-[#8B98A5]">
+                    TELEMETRY INITIALIZATION
+                  </p>
+                </div>
+              </div>
+
+              {/* Counter badge */}
+              <div className="flex items-center gap-1.5 rounded border border-[#00D4FF]/20 bg-[#0B1724]/90 px-2 py-0.5 font-mono text-[0.6rem] text-[#00D4FF]">
+                <span className="font-bold">{systemDone.size}</span>
+                <span className="text-[#8B98A5]">/</span>
+                <span>{activation.systems.length}</span>
+              </div>
+            </div>
+
+            {/* System rows */}
+            <ul className="w-full space-y-3 font-mono text-sm">
+              {activation.systems.map((sys, i) => {
+                const isDone = i < count;
+                const isInitializing = i === initializingIndex;
+                const isPending = i > count && !isInitializing;
+                const isVisuallyDone = systemDone.has(i);
+                const progress = systemProgress[i] ?? 0;
+
+                return (
+                  <li
+                    key={sys.label}
+                    className={`relative flex items-center gap-3 rounded-lg border px-3 py-2.5 transition-all duration-300 ${
+                      isInitializing
+                        ? "border-[#00D4FF]/50 bg-[#00D4FF]/10 shadow-[0_0_15px_rgba(0,212,255,0.15)]"
+                        : isVisuallyDone
+                        ? "border-[#00E5A0]/25 bg-[#00E5A0]/5"
+                        : "border-[#1B2A36]/40 bg-[#07111D]/40 opacity-50"
+                    }`}
+                    aria-hidden={isPending}
                   >
-                    {sys.label}
-                  </motion.span>
+                    {/* System Name */}
+                    <div className="w-32 shrink-0">
+                      <span className="font-display text-xs font-semibold tracking-wider text-[#F5F7FA]">
+                        {sys.label}
+                      </span>
+                    </div>
 
-                  {/* Center area - loading bar replaces dotted line during initialization */}
-                  <AnimatePresence mode="wait">
-                    {isInitializing && (
-                      <motion.div
-                        key="loading-center"
-                        initial="hidden"
-                        animate="visible"
-                        exit="hidden"
-                        className="flex-1 flex items-center gap-3 min-w-0"
-                      >
-                        <div className="flex-1 h-2 bg-[#1B2A36] rounded-full overflow-hidden relative">
-                          <motion.div
-                            className="h-full bg-gradient-to-r from-[#00D4FF] to-[#00E5A0] rounded-full"
-                            initial={{ width: "0%" }}
-                            animate={{ width: `${progress}%` }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                          />
-                          <span className="absolute inset-0 flex items-center justify-center text-[0.55rem] font-mono text-[#050A0F] font-bold">{progress}%</span>
+                    {/* Center Area: Progress Bar or Connection Line */}
+                    <div className="flex-1 min-w-0">
+                      {isInitializing ? (
+                        <div className="flex items-center gap-2">
+                          <div className="relative h-1.5 flex-1 overflow-hidden rounded-full bg-[#1B2A36]">
+                            <motion.div
+                              className="h-full rounded-full bg-gradient-to-r from-[#00D4FF] to-[#00E5A0]"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                          <span className="font-mono text-[0.58rem] font-bold text-[#00D4FF] shrink-0">
+                            {Math.round(progress)}%
+                          </span>
                         </div>
-                        <div className="flex items-center gap-1 text-[0.62rem] font-medium tracking-[0.2em] text-[#00D4FF] whitespace-nowrap shrink-0">
-                          <span>INITIALIZING</span>
-                          <motion.span
-                            variants={loadingVariants}
-                            className="inline-block w-1 h-1 rounded-full bg-[#00D4FF]"
-                            style={{ animationDelay: "0ms" }}
-                          />
-                          <motion.span
-                            variants={loadingVariants}
-                            className="inline-block w-1 h-1 rounded-full bg-[#00D4FF]"
-                            style={{ animationDelay: "150ms" }}
-                          />
-                          <motion.span
-                            variants={loadingVariants}
-                            className="inline-block w-1 h-1 rounded-full bg-[#00D4FF]"
-                            style={{ animationDelay: "300ms" }}
-                          />
-                        </div>
-                      </motion.div>
-                    )}
-                    {!isInitializing && (
-                      <motion.div
-                        key="dots"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        className="flex-1 border-b border-dotted border-[#2A3B4A]"
-                      />
-                    )}
-                  </AnimatePresence>
+                      ) : isVisuallyDone ? (
+                        <div className="h-px w-full bg-gradient-to-r from-[#00E5A0]/30 via-[#00E5A0]/60 to-[#00E5A0]/30" />
+                      ) : (
+                        <div className="h-px w-full border-b border-dashed border-[#2A3B4A]" />
+                      )}
+                    </div>
 
-                  {/* Right side - status */}
-                  <AnimatePresence mode="wait">
-                    {isDone && !isVisuallyDone && (
-                      <motion.span
-                        key="status-pending"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.5 }}
-                        className="text-[0.62rem] font-medium tracking-[0.2em] text-[#00D4FF] w-24 shrink-0 text-right"
-                      >
-                        COMPLETING…
-                      </motion.span>
-                    )}
-                    {isVisuallyDone && (
-                      <motion.span
-                        key="status-done"
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, ease: easeOut }}
-                        className="text-[0.62rem] font-medium tracking-[0.2em] text-[#00E5A0] w-24 shrink-0 text-right"
-                      >
-                        {sys.status}
-                      </motion.span>
-                    )}
-                    {isPending && (
-                      <motion.span
-                        key="pending"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 0.5 }}
-                        className="text-[0.62rem] font-medium tracking-[0.2em] text-[#2A3B4A] w-24 shrink-0 text-right"
-                      >
-                        STANDBY
-                      </motion.span>
-                    )}
-                  </AnimatePresence>
-                </li>
-              );
-            })}
-          </ul>
+                    {/* Right Side: Status Badge */}
+                    <div className="w-24 shrink-0 text-right">
+                      {isInitializing && (
+                        <span className="inline-flex items-center gap-1 rounded border border-[#00D4FF]/40 bg-[#00D4FF]/10 px-2 py-0.5 font-mono text-[0.6rem] font-bold text-[#00D4FF]">
+                          <span className="h-1 w-1 animate-pulse rounded-full bg-[#00D4FF]" />
+                          SYNC
+                        </span>
+                      )}
+                      {isDone && !isVisuallyDone && !isInitializing && (
+                        <span className="font-mono text-[0.6rem] text-[#00D4FF]">
+                          COMPLETING…
+                        </span>
+                      )}
+                      {isVisuallyDone && (
+                        <span className="inline-flex items-center gap-1 rounded border border-[#00E5A0]/40 bg-[#00E5A0]/10 px-2 py-0.5 font-mono text-[0.62rem] font-bold text-[#00E5A0] shadow-[0_0_10px_rgba(0,229,160,0.2)]">
+                          <span className="h-1.5 w-1.5 rounded-full bg-[#00E5A0]" />
+                          {sys.status}
+                        </span>
+                      )}
+                      {isPending && (
+                        <span className="font-mono text-[0.58rem] tracking-wider text-[#8B98A5]/50">
+                          STANDBY
+                        </span>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
 
-          <AnimatePresence>
-            {ready && (
-              <motion.p
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6, ease: easeOut }}
-                className="mt-12 font-display text-xl font-medium uppercase tracking-[0.3em] text-[#00D4FF]"
-              >
-                {activation.ready}
-              </motion.p>
-            )}
-          </AnimatePresence>
+            {/* Bottom: ALL SYSTEMS READY Climax */}
+            <div className="mt-5 border-t border-[#1B2A36]/60 pt-4">
+              <AnimatePresence mode="wait">
+                {ready ? (
+                  <motion.div
+                    key="all-ready"
+                    initial={{ opacity: 0, scale: 0.95, y: 5 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    transition={{ duration: 0.4, ease: easeOut }}
+                    className="flex flex-col items-center justify-center rounded-xl border border-[#00E5A0]/50 bg-gradient-to-r from-[#00D4FF]/15 via-[#00E5A0]/20 to-[#00D4FF]/15 py-3 shadow-[0_0_25px_rgba(0,229,160,0.25)]"
+                  >
+                    <div className="flex items-center gap-2 text-[#00E5A0]">
+                      <svg className="h-4 w-4 animate-pulse" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <span className="font-display text-base font-bold uppercase tracking-[0.25em] text-[#00E5A0] drop-shadow-[0_0_12px_rgba(0,229,160,0.8)]">
+                        {activation.ready}
+                      </span>
+                    </div>
+                    <p className="mt-1 font-mono text-[0.52rem] tracking-[0.2em] text-[#F5F7FA]/70">
+                      INTEGRATION COMPLETE · COMMENCING CEREMONY
+                    </p>
+                  </motion.div>
+                ) : (
+                  <div className="flex items-center justify-between px-1 font-mono text-[0.58rem] text-[#8B98A5]">
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-1.5 w-1.5 rounded-full bg-[#00D4FF] animate-ping" />
+                      <span>INITIALIZING SYSTEMS...</span>
+                    </div>
+                    <span>STANDBY</span>
+                  </div>
+                )}
+              </AnimatePresence>
+            </div>
+          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>
