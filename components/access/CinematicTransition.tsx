@@ -2,45 +2,171 @@
 
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Zap } from "lucide-react";
+import { Sparkles, Radio } from "lucide-react";
 import { useAccess } from "@/lib/access-machine";
 import { useSound } from "@/lib/sound";
 import { easeInOut, easeOut } from "@/lib/motion";
+import { event } from "@/data/event";
 
 /**
- * Hyper-Spectacular Stacked Circular Iris Portal Transition:
- * - Phase 1: Cyber Lattice Overdrive & Laser Blades (0 -> 1.3s)
- * - Phase 2: High-Speed Stacked Concentric Circular Iris Burst directly revealing the video (1.3s -> 2.5s)
- * - Phase 3: AIRO video playback
- * - Phase 4: Command Center Drone AI video playback
+ * Trapcode Luminous Wave Canvas
+ * Generates an elegant, silky 3D particle ribbon wave field and subtle starglow dust.
+ */
+function TrapcodeWaveCanvas() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animId: number;
+    let width = (canvas.width = canvas.parentElement?.clientWidth || window.innerWidth);
+    let height = (canvas.height = canvas.parentElement?.clientHeight || window.innerHeight);
+
+    const handleResize = () => {
+      if (!canvas) return;
+      width = canvas.width = canvas.parentElement?.clientWidth || window.innerWidth;
+      height = canvas.height = canvas.parentElement?.clientHeight || window.innerHeight;
+    };
+    window.addEventListener("resize", handleResize);
+
+    const cols = 42;
+    const rows = 14;
+    let time = 0;
+
+    // Gentle floating starglow particles
+    const sparks = Array.from({ length: 35 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.4,
+      vy: -0.3 - Math.random() * 0.5,
+      size: Math.random() * 1.8 + 0.8,
+      color: Math.random() < 0.3 ? "#FFD700" : Math.random() < 0.65 ? "#00E5A0" : "#00D4FF",
+      alpha: Math.random() * 0.6 + 0.2,
+    }));
+
+    const render = () => {
+      ctx.clearRect(0, 0, width, height);
+      time += 0.018;
+
+      const fov = 420;
+      const cameraY = -70;
+      const cameraZ = -120;
+      const spacingX = width / (cols * 0.85);
+      const spacingZ = 28;
+
+      // Draw Floating Starglow Micro-particles
+      for (let i = 0; i < sparks.length; i++) {
+        const s = sparks[i];
+        s.x += s.vx;
+        s.y += s.vy;
+        if (s.y < 0) {
+          s.y = height + 10;
+          s.x = Math.random() * width;
+        }
+        ctx.fillStyle = s.color;
+        ctx.globalAlpha = s.alpha * (0.5 + Math.sin(time * 2 + i) * 0.4);
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Draw 3D Trapcode Wave Ribbons
+      for (let r = 0; r < rows; r++) {
+        ctx.beginPath();
+        let prevPx = 0;
+        let prevPy = 0;
+
+        for (let c = 0; c < cols; c++) {
+          const worldX = (c - cols / 2) * spacingX;
+          const worldZ = (r + 3) * spacingZ;
+
+          const wave1 = Math.sin(c * 0.18 + time * 1.2) * 32;
+          const wave2 = Math.cos(r * 0.28 + time * 0.9) * 22;
+          const wave3 = Math.sin((c + r) * 0.14 + time * 1.1) * 14;
+          const worldY = 140 + wave1 + wave2 + wave3;
+
+          const relZ = worldZ - cameraZ;
+          const scale = fov / (fov + relZ);
+          const px = width / 2 + worldX * scale;
+          const py = height / 2 + (worldY - cameraY) * scale;
+          const alpha = Math.max(0.05, Math.min(0.55, 1 - relZ / 750));
+
+          // Draw node particle
+          ctx.fillStyle = r % 2 === 0 ? "#00D4FF" : "#00E5A0";
+          ctx.globalAlpha = alpha;
+          ctx.beginPath();
+          ctx.arc(px, py, (c + r) % 5 === 0 ? 2.2 : 1.2, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Connect with smooth curve
+          if (c === 0) {
+            ctx.moveTo(px, py);
+          } else {
+            ctx.lineTo(px, py);
+          }
+          prevPx = px;
+          prevPy = py;
+        }
+
+        ctx.strokeStyle = r % 2 === 0 ? "rgba(0, 212, 255, 0.12)" : "rgba(0, 229, 160, 0.10)";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      animId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      cancelAnimationFrame(animId);
+    };
+  }, []);
+
+  return <canvas ref={canvasRef} className="pointer-events-none absolute inset-0 h-full w-full opacity-85" />;
+}
+
+/**
+ * Elegant Trapcode Transition & Video Sequence:
+ * - Phase 1: Minimalist Trapcode Starglow Waves + Cadence Reveal (0 -> ~2.4s)
+ * - Phase 2: Soft Cinematic Feathered Aperture into AIRO Video
+ * - Phase 3: Command Center Drone AI Video Playback
  */
 export default function CinematicTransition() {
   const { state } = useAccess();
   const sound = useSound();
   const armed = useRef(false);
-  const [phase, setPhase] = useState<"lattice" | "iris" | "video" | "done">("lattice");
+  const [phase, setPhase] = useState<"trapcode" | "iris" | "video" | "done">("trapcode");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     if (armed.current) return;
     armed.current = true;
+
+    // Play subtle ambient atmospheric tone and trigger voice line exactly with the screen reveal
     sound.play("authenticate");
+    const voiceTimer = window.setTimeout(() => {
+      sound.playVoice("future");
+    }, 250);
 
-    // Phase 1 (Lattice & Laser Blades): 0 -> 1.3s
+    // Phase 1 (Trapcode Wave & Typography with Voice): 0 -> ~3.0s
     const t1 = window.setTimeout(() => {
-      sound.play("success");
       setPhase("iris");
-    }, 1300);
+    }, 3000);
 
-    // Phase 2 (Stacked Circular Iris Portal into Video): 1.3s -> video runs
-    // AIRO video runs ~10s
-    const t2 = window.setTimeout(() => setPhase("video"), 11500);
+    // Phase 2 (Soft Aperture into AIRO Video): ~11s
+    const t2 = window.setTimeout(() => setPhase("video"), 12600);
 
-    // Command Center video (~8s)
-    const t3 = window.setTimeout(() => setPhase("done"), 19500);
+    // Phase 3 (Command Center drone video): ~8s
+    const t3 = window.setTimeout(() => setPhase("done"), 21000);
 
     return () => {
       armed.current = false;
+      window.clearTimeout(voiceTimer);
       window.clearTimeout(t1);
       window.clearTimeout(t2);
       window.clearTimeout(t3);
@@ -70,81 +196,98 @@ export default function CinematicTransition() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.4, ease: easeInOut }}
+        transition={{ duration: 0.6, ease: easeInOut }}
         aria-hidden="true"
       >
-        {/* PHASE 1: Cyber Lattice Overdrive + Slicing Laser Blades */}
-        {phase === "lattice" && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            {/* Cold Flash Pulse */}
+        {/* PHASE 1: Elegant Trapcode Particle Wave & Minimalist Telemetry */}
+        {phase === "trapcode" && (
+          <motion.div
+            key="trapcode-phase"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+            className="relative flex h-full w-full items-center justify-center overflow-hidden"
+          >
+            {/* Trapcode 3D Canvas Background */}
+            <TrapcodeWaveCanvas />
+
+            {/* Ambient Breathing Cyan & Gold Aura */}
             <motion.div
-              className="absolute inset-0 bg-[#00D4FF]"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.8, 0.1, 0.5, 0] }}
-              transition={{ duration: 1.1, ease: "easeInOut" }}
+              animate={{ opacity: [0.15, 0.35, 0.15], scale: [0.95, 1.08, 0.95] }}
+              transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+              className="pointer-events-none absolute h-[500px] w-[500px] rounded-full bg-gradient-to-tr from-[#00D4FF]/20 via-[#00E5A0]/15 to-transparent blur-[120px]"
             />
 
-            {/* 3D Deep Space Hexagonal Lattice Expand */}
-            <motion.div
-              className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(0,212,255,0.25)_0%,transparent_70%),linear-gradient(rgba(0,229,160,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.18)_1px,transparent_1px)] bg-[size:40px_40px]"
-              initial={{ scale: 3, rotate: 15, opacity: 0 }}
-              animate={{ scale: 1, rotate: 0, opacity: 1 }}
-              transition={{ duration: 1.2, ease: easeInOut }}
-            />
-
-            {/* Slicing Laser Blade 1 (Cyan) */}
-            <motion.div
-              className="absolute -inset-y-32 w-2 -skew-x-45 bg-[#00D4FF] shadow-[0_0_50px_15px_#00D4FF,0_0_100px_30px_#00E5A0]"
-              initial={{ left: "-40%" }}
-              animate={{ left: "140%" }}
-              transition={{ duration: 0.8, delay: 0.15, ease: "easeInOut" }}
-            />
-
-            {/* Slicing Laser Blade 2 (Gold) */}
-            <motion.div
-              className="absolute -inset-y-32 w-2 skew-x-45 bg-[#FFD700] shadow-[0_0_50px_15px_#FFD700,0_0_100px_30px_#C9A96E]"
-              initial={{ right: "-40%" }}
-              animate={{ right: "140%" }}
-              transition={{ duration: 0.8, delay: 0.35, ease: "easeInOut" }}
-            />
-
-            {/* Central Holographic Target HUD */}
-            <motion.div
-              initial={{ scale: 0.2, opacity: 0, rotate: -90 }}
-              animate={{ scale: [0.2, 1.2, 1], opacity: 1, rotate: 0 }}
-              transition={{ duration: 1, ease: easeOut }}
-              className="relative z-10 flex flex-col items-center"
-            >
-              {/* Concentric Rotating Tech Rings */}
+            {/* Centerpiece Minimalist Luxury Typography */}
+            <div className="relative z-10 flex flex-col items-center px-6 text-center">
+              {/* Subtle Pill Badge */}
               <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ repeat: Infinity, duration: 8, ease: "linear" }}
-                className="h-44 w-44 rounded-full border-2 border-dashed border-[#00D4FF]/60 p-4 shadow-[0_0_40px_rgba(0,212,255,0.4)]"
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="mb-4 flex items-center gap-2 rounded-full border border-[#00D4FF]/30 bg-[#0B1724]/70 px-4 py-1 backdrop-blur-md"
               >
-                <div className="h-full w-full rounded-full border border-[#00E5A0]/60 p-3">
-                  <div className="h-full w-full rounded-full border border-dashed border-[#FFD700]/60" />
-                </div>
+                <Radio className="h-3 w-3 text-[#00D4FF] animate-pulse" />
+                <span className="font-mono text-[0.62rem] font-bold uppercase tracking-[0.28em] text-[#00D4FF]">
+                  {event.companyShort} · IT COMMAND CENTER
+                </span>
               </motion.div>
 
-              <div className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center">
-                <Zap className="h-9 w-9 text-[#00E5A0] animate-pulse drop-shadow-[0_0_20px_#00E5A0]" />
-                <span className="mt-2 font-mono text-[0.65rem] font-black uppercase tracking-[0.35em] text-[#00D4FF] drop-shadow-[0_0_12px_#00D4FF]">
-                  AIRO // CEREMONIAL PORTAL
-                </span>
-              </div>
-            </motion.div>
-          </div>
+              {/* Main Cadence Line */}
+              <motion.h1
+                initial={{ opacity: 0, letterSpacing: "0.25em", y: 15 }}
+                animate={{ opacity: 1, letterSpacing: "0.38em", y: 0 }}
+                transition={{ duration: 1.4, ease: easeOut }}
+                className="font-display text-3xl sm:text-5xl md:text-6xl font-extrabold uppercase leading-tight text-[#F5F7FA] drop-shadow-[0_0_35px_rgba(0,212,255,0.4)]"
+              >
+                THE FUTURE STARTS HERE
+              </motion.h1>
+
+              {/* Minimalist Glowing Gold Divider */}
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: "160px", opacity: 1 }}
+                transition={{ duration: 0.9, delay: 0.3 }}
+                className="my-5 h-px bg-gradient-to-r from-transparent via-[#FFD700]/70 to-transparent"
+              />
+
+              {/* Sub-label & Subtle Pulse Bar */}
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.7, delay: 0.45 }}
+                className="flex flex-col items-center gap-2"
+              >
+                <p className="font-mono text-[0.65rem] uppercase tracking-[0.3em] text-[#8B98A5]">
+                  INTEGRATED COMMAND & COORDINATION EXCELLENCE
+                </p>
+
+                {/* Minimalist Equalizer Pulse */}
+                <div className="mt-2 flex items-center gap-1">
+                  {[40, 70, 100, 60, 90, 50, 80, 30].map((h, i) => (
+                    <motion.span
+                      key={i}
+                      animate={{ height: [`${h * 0.3}%`, `${h}%`, `${h * 0.4}%`] }}
+                      transition={{ repeat: Infinity, duration: 1 + i * 0.1, ease: "easeInOut" }}
+                      className="h-3.5 w-0.5 rounded-full bg-gradient-to-t from-[#00D4FF] to-[#00E5A0]"
+                    />
+                  ))}
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         )}
 
-        {/* PHASE 2 & 3: High-Speed Stacked Circular Iris Opening into AIRO Video */}
+        {/* PHASE 2: Soft Cinematic Feathered Aperture into AIRO Video */}
         {(phase === "iris" || phase === "video") && (
           <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            {/* AIRO Video Container with Circular Iris Expanding Mask */}
+            {/* Video with Smooth Expanding Circular Aperture */}
             <motion.div
               className="absolute inset-0 overflow-hidden"
-              initial={{ clipPath: "circle(0% at 50% 50%)" }}
-              animate={{ clipPath: "circle(150% at 50% 50%)" }}
-              transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ clipPath: "circle(0% at 50% 50%)", opacity: 0.8 }}
+              animate={{ clipPath: "circle(150% at 50% 50%)", opacity: 1 }}
+              transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
             >
               <video
                 ref={videoRef}
@@ -164,58 +307,23 @@ export default function CinematicTransition() {
               <div className="absolute inset-0 bg-gradient-to-t from-[#050A0F]/60 via-transparent to-[#050A0F]/40 pointer-events-none" />
             </motion.div>
 
-            {/* Fast-Speed Stacked Concentric Portal Rings Exiting outwards */}
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              {/* Ring 1: Outer Cyan Neon Shockwave */}
-              <motion.div
-                className="absolute rounded-full border-4 border-[#00D4FF] shadow-[0_0_80px_30px_#00D4FF]"
-                initial={{ width: 40, height: 40, opacity: 1, scale: 0.2 }}
-                animate={{ width: 2800, height: 2800, opacity: [1, 1, 0], scale: 1 }}
-                transition={{ duration: 1.1, delay: 0, ease: easeOut }}
-              />
-
-              {/* Ring 2: Electric Emerald Portal Ring */}
-              <motion.div
-                className="absolute rounded-full border-4 border-[#00E5A0] shadow-[0_0_90px_35px_#00E5A0]"
-                initial={{ width: 40, height: 40, opacity: 1, scale: 0.2 }}
-                animate={{ width: 2600, height: 2600, opacity: [1, 1, 0], scale: 1 }}
-                transition={{ duration: 1.1, delay: 0.08, ease: easeOut }}
-              />
-
-              {/* Ring 3: Royal Gold Concentric Energy Ring */}
-              <motion.div
-                className="absolute rounded-full border-3 border-[#FFD700] shadow-[0_0_70px_25px_#FFD700]"
-                initial={{ width: 40, height: 40, opacity: 1, scale: 0.2 }}
-                animate={{ width: 2400, height: 2400, opacity: [1, 1, 0], scale: 1 }}
-                transition={{ duration: 1.1, delay: 0.16, ease: easeOut }}
-              />
-
-              {/* Ring 4: Laser Cyan Core Ring */}
-              <motion.div
-                className="absolute rounded-full border-2 border-white shadow-[0_0_60px_20px_white]"
-                initial={{ width: 40, height: 40, opacity: 1, scale: 0.2 }}
-                animate={{ width: 2200, height: 2200, opacity: [1, 1, 0], scale: 1 }}
-                transition={{ duration: 1.1, delay: 0.24, ease: easeOut }}
-              />
-
-              {/* Central Iris Flare Spark */}
-              <motion.div
-                className="h-16 w-16 rounded-full bg-gradient-to-r from-[#00D4FF] via-white to-[#00E5A0] shadow-[0_0_80px_40px_#00D4FF]"
-                initial={{ scale: 1, opacity: 1 }}
-                animate={{ scale: [1, 4, 0], opacity: [1, 0.8, 0] }}
-                transition={{ duration: 0.7, ease: "easeOut" }}
-              />
-            </div>
+            {/* Single Elegant Soft Glow Aperture Ring */}
+            <motion.div
+              className="pointer-events-none absolute rounded-full border border-[#00D4FF]/60 shadow-[0_0_60px_15px_rgba(0,212,255,0.3)]"
+              initial={{ width: 30, height: 30, opacity: 0.9, scale: 0.3 }}
+              animate={{ width: 2600, height: 2600, opacity: 0, scale: 1 }}
+              transition={{ duration: 1.6, ease: [0.22, 1, 0.36, 1] }}
+            />
           </div>
         )}
 
-        {/* PHASE 4: Command Center Drone AI Video Playback */}
+        {/* PHASE 3: Command Center Drone AI Video Playback */}
         {phase === "video" && (
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
           >
             <video
               ref={videoRef}

@@ -112,7 +112,6 @@ export function AccessProvider({ children }: { children: React.ReactNode }) {
     const welcomeTime = authSeq.grantedDurationMs + systemsTotalMs;
     schedule(() => sound.playVoice("welcome"), welcomeTime);
     schedule(() => sound.playVoice("closing"), welcomeTime + 2000);
-    schedule(() => sound.playVoice("future"), welcomeTime + 5300);
 
     schedule(() => dispatch({ type: "VOICE_DONE" }), authSeq.grantedDurationMs);
     // eslint-disable-next-line react-hooks/exhaustive-deps
