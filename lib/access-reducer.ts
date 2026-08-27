@@ -1,6 +1,6 @@
 import { access } from "../data/event";
 
-/** Explicit states — prevents impossible combinations (see frontend-engineering.md). */
+/** Explicit states — prevents impossible combinations */
 export type AccessState =
   | "idle"
   | "landing"
@@ -10,8 +10,8 @@ export type AccessState =
   | "granted"
   | "voice"
   | "activation"
-  | "event"
-  | "cinematic";
+  | "cinematic"
+  | "event";
 
 export type AccessAction =
   | { type: "OPEN_MODAL" }
@@ -23,8 +23,9 @@ export type AccessAction =
   | { type: "GRANTED" }
   | { type: "VOICE_DONE" }
   | { type: "ACTIVATION_DONE" }
-  | { type: "TO_EVENT" }
-  | { type: "TO_CINEMATIC" };
+  | { type: "TO_CINEMATIC" }
+  | { type: "CINEMATIC_DONE" }
+  | { type: "TO_EVENT" };
 
 export interface AccessStateShape {
   state: AccessState;
@@ -46,38 +47,53 @@ export function accessReducer(
     case "OPEN_MODAL":
       if (prev.state !== "landing") return prev;
       return { ...prev, state: "pin", dialogOpen: true, pin: "" };
+
     case "CLOSE_MODAL":
       if (prev.state !== "pin" && prev.state !== "denied") return prev;
       return { ...prev, state: "landing", dialogOpen: false, pin: "" };
+
     case "SET_PIN":
       if (action.pin.length > access.codeLength) return prev;
       return { ...prev, pin: action.pin };
+
     case "VERIFY":
       if (prev.state !== "pin" || prev.pin.length !== access.codeLength)
         return prev;
       return { ...prev, state: "verifying" };
+
     case "DENIED":
       if (prev.state !== "verifying") return prev;
       return { ...prev, state: "denied", pin: "" };
+
     case "RETRY":
       if (prev.state !== "denied") return prev;
       return { ...prev, state: "pin", pin: "" };
+
     case "GRANTED":
       if (prev.state !== "verifying") return prev;
       return { ...prev, state: "granted", dialogOpen: false };
+
     case "VOICE_DONE":
       if (prev.state === "granted") return { ...prev, state: "voice" };
       if (prev.state === "voice") return { ...prev, state: "activation" };
       return prev;
+
     case "ACTIVATION_DONE":
-      if (prev.state !== "voice" && prev.state !== "activation") return prev;
-      return { ...prev, state: "event" };
-    case "TO_EVENT":
-      if (prev.state !== "activation") return prev;
-      return { ...prev, state: "event" };
     case "TO_CINEMATIC":
-      if (prev.state !== "event") return prev;
+      if (prev.state !== "voice" && prev.state !== "activation") return prev;
       return { ...prev, state: "cinematic" };
+
+    case "CINEMATIC_DONE":
+    case "TO_EVENT":
+      if (
+        prev.state !== "cinematic" &&
+        prev.state !== "activation" &&
+        prev.state !== "voice"
+      ) {
+        return prev;
+      }
+      return { ...prev, state: "event" };
+
     default:
       return prev;
   }

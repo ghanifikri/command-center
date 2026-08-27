@@ -1,6 +1,13 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type SoundName =
   | "click"
@@ -10,31 +17,21 @@ export type SoundName =
   | "authenticate"
   | "verifying";
 
-/**
- * Modular sound system.
- *
- * Priority per audio-voice.md:
- *   1. Real audio files in /public/audio (voice-over, music, etc.)
- *   2. Web Audio synthesized tones as an always-available fallback
- *   3. Silent no-op — the experience must never break on audio failure
- *
- * The synthesized click/beep/success/error tones exist so the PIN flow still
- * "sounds" premium before any audio assets are delivered. Voice-over is
- * strictly file-based (never synthesized) and is fully optional.
- */
+export type VoiceKind = "granted" | "welcome" | "moment" | "closing" | "future";
+
 interface SoundManagerContextValue {
   startVerifying: () => void;
   stopVerifying: () => void;
   muted: boolean;
   toggleMuted: () => void;
   play: (name: SoundName) => void;
-  playVoice: (kind: "granted" | "welcome" | "moment" | "closing" | "future") => void;
+  playVoice: (kind: VoiceKind) => void;
   resume: () => void;
 }
 
 const SoundManagerContext = createContext<SoundManagerContextValue | null>(null);
 
-const VOICE_FILES: Record<string, string | undefined> = {
+const VOICE_FILES: Record<VoiceKind, string> = {
   granted: "/audio/voice-access-granted.wav",
   welcome: "/audio/voice-welcome.wav",
   moment: "/audio/voice-moment.wav",
@@ -42,7 +39,7 @@ const VOICE_FILES: Record<string, string | undefined> = {
   future: "/audio/voice-future.wav",
 };
 
-const UI_FILES: Record<string, string | undefined> = {
+const UI_FILES: Partial<Record<SoundName, string>> = {
   click: "/audio/ui-click.mp3",
   beep: "/audio/pin-beep.mp3",
   success: "/audio/access-granted.mp3",
@@ -64,84 +61,106 @@ function useAudioEngine() {
   const ctxRef = useRef<AudioContext | null>(null);
   const verifyingOscRef = useRef<OscillatorNode | null>(null);
   const verifyingGainRef = useRef<GainNode | null>(null);
+  const verifyingIntervalRef = useRef<number | null>(null);
   const [muted, setMuted] = useState(false);
 
-  const ctx = useCallback((): AudioContext | null => {
+  const getAudioContext = useCallback((): AudioContext | null => {
     if (typeof window === "undefined") return null;
-    const AC =
+    const AudioCtx =
       window.AudioContext ??
       (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AC) return null;
-    ctxRef.current ??= new AC();
+    if (!AudioCtx) return null;
+    ctxRef.current ??= new AudioCtx();
     return ctxRef.current;
   }, []);
+
+  const resume = useCallback(() => {
+    const c = getAudioContext();
+    if (c && c.state === "suspended") {
+      void c.resume().catch(() => {});
+    }
+  }, [getAudioContext]);
 
   const synth = useCallback(
     (name: SoundName) => {
       if (muted) return;
-      const c = ctx();
+      const c = getAudioContext();
       if (!c || c.state !== "running") return;
       const def = SYNTH[name];
       if (!def) return;
-      const t0 = c.currentTime;
-      const osc = c.createOscillator();
-      const gain = c.createGain();
-      osc.type = def.type;
-      osc.frequency.setValueAtTime(def.freq, t0);
-      osc.frequency.exponentialRampToValueAtTime(Math.max(def.end, 1), t0 + def.dur);
-      gain.gain.setValueAtTime(def.gain, t0);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + def.dur);
-      osc.connect(gain).connect(c.destination);
-      osc.start(t0);
-      osc.stop(t0 + def.dur + 0.02);
+
+      try {
+        const t0 = c.currentTime;
+        const osc = c.createOscillator();
+        const gain = c.createGain();
+        osc.type = def.type;
+        osc.frequency.setValueAtTime(def.freq, t0);
+        osc.frequency.exponentialRampToValueAtTime(Math.max(def.end, 1), t0 + def.dur);
+        gain.gain.setValueAtTime(def.gain, t0);
+        gain.gain.exponentialRampToValueAtTime(0.0001, t0 + def.dur);
+        osc.connect(gain).connect(c.destination);
+        osc.start(t0);
+        osc.stop(t0 + def.dur + 0.02);
+      } catch {
+        // Safe no-op if audio node creation is restricted
+      }
     },
-    [muted, ctx],
+    [muted, getAudioContext],
   );
 
-  // Continuous verifying pulse sound
   const startVerifying = useCallback(() => {
     if (muted) return;
-    const c = ctx();
-    if (!c || c.state !== "running") return;
-    if (verifyingOscRef.current) return;
+    const c = getAudioContext();
+    if (!c || c.state !== "running" || verifyingOscRef.current) return;
 
-    const osc = c.createOscillator();
-    const gain = c.createGain();
-    osc.type = "sine";
-    osc.frequency.setValueAtTime(520, c.currentTime);
-    gain.gain.setValueAtTime(0.015, c.currentTime);
-    osc.connect(gain).connect(c.destination);
-    osc.start();
-    verifyingOscRef.current = osc;
-    verifyingGainRef.current = gain;
+    try {
+      const osc = c.createOscillator();
+      const gain = c.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(520, c.currentTime);
+      gain.gain.setValueAtTime(0.015, c.currentTime);
+      osc.connect(gain).connect(c.destination);
+      osc.start();
+      verifyingOscRef.current = osc;
+      verifyingGainRef.current = gain;
 
-    // Pulsing effect
-    const pulse = () => {
-      if (!verifyingGainRef.current || !verifyingOscRef.current) return;
-      const t = c.currentTime;
-      verifyingGainRef.current.gain.setValueAtTime(0.015, t);
-      verifyingGainRef.current.gain.linearRampToValueAtTime(0.035, t + 0.4);
-      verifyingGainRef.current.gain.linearRampToValueAtTime(0.015, t + 0.8);
-    };
-    const interval = setInterval(pulse, 800);
-    verifyingOscRef.current.onended = () => clearInterval(interval);
-  }, [muted, ctx]);
+      const pulse = () => {
+        if (!verifyingGainRef.current || !verifyingOscRef.current || !c) return;
+        const t = c.currentTime;
+        verifyingGainRef.current.gain.setValueAtTime(0.015, t);
+        verifyingGainRef.current.gain.linearRampToValueAtTime(0.035, t + 0.4);
+        verifyingGainRef.current.gain.linearRampToValueAtTime(0.015, t + 0.8);
+      };
+      verifyingIntervalRef.current = window.setInterval(pulse, 800);
+    } catch {
+      // Audio node failure fallback
+    }
+  }, [muted, getAudioContext]);
 
   const stopVerifying = useCallback(() => {
+    if (verifyingIntervalRef.current !== null) {
+      window.clearInterval(verifyingIntervalRef.current);
+      verifyingIntervalRef.current = null;
+    }
     if (verifyingOscRef.current) {
-      verifyingOscRef.current.stop();
+      try {
+        verifyingOscRef.current.stop();
+        verifyingOscRef.current.disconnect();
+      } catch {
+        // Ignore disconnect errors
+      }
       verifyingOscRef.current = null;
       verifyingGainRef.current = null;
     }
   }, []);
 
   const playFile = useCallback(
-    (path: string | undefined) => {
-      if (muted || !path) return Promise.resolve();
+    (path: string | undefined): Promise<void> => {
+      if (muted || !path || typeof window === "undefined") return Promise.resolve();
       return new Promise<void>((resolve) => {
         const audio = new Audio(path);
         audio.volume = 0.8;
-        audio.preload = "none";
+        audio.preload = "auto";
         audio.onended = () => resolve();
         audio.onerror = () => resolve();
         audio.play().catch(() => resolve());
@@ -150,41 +169,45 @@ function useAudioEngine() {
     [muted],
   );
 
-  const resume = useCallback(() => {
-    const c = ctx();
-    if (c && c.state === "suspended") void c.resume();
-  }, [ctx]);
-
   const play = useCallback(
     (name: SoundName) => {
       if (muted) return;
+      resume();
       const file = UI_FILES[name];
       if (file) {
-        void playFile(file);
-        synth(name);
+        playFile(file).catch(() => synth(name));
       } else {
         synth(name);
       }
     },
-    [muted, playFile, synth],
+    [muted, playFile, synth, resume],
   );
 
   const playVoice = useCallback(
-    (kind: "granted" | "welcome" | "moment" | "closing" | "future") => {
+    (kind: VoiceKind) => {
+      if (muted) return;
+      resume();
       void playFile(VOICE_FILES[kind]);
     },
-    [playFile],
+    [muted, playFile, resume],
   );
 
   const toggleMuted = useCallback(() => {
     setMuted((m) => !m);
-    ctxRef.current?.suspend();
-  }, []);
+    if (!muted) {
+      stopVerifying();
+      if (ctxRef.current && ctxRef.current.state === "running") {
+        void ctxRef.current.suspend();
+      }
+    } else {
+      resume();
+    }
+  }, [muted, stopVerifying, resume]);
 
   return { muted, toggleMuted, play, playVoice, resume, startVerifying, stopVerifying };
 }
 
-export function SoundProvider({ children }: { children: React.ReactNode }) {
+export function SoundProvider({ children }: { children: ReactNode }) {
   const engine = useAudioEngine();
   return (
     <SoundManagerContext.Provider value={engine}>

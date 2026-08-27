@@ -1,213 +1,170 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 import { useAccess } from "@/lib/access-machine";
 import { useSound } from "@/lib/sound";
 import { easeInOut, easeOut } from "@/lib/motion";
 
-/**
- * Cinematic finale after the event page:
- * - Grid lattice reveal
- * - Light sweep
- * - Brightness rise
- * - Zoom into white light
- * - Video playback
- */
+type CinematicPhase = "lattice" | "zoom" | "video" | "outro";
+
 export default function CinematicTransition() {
-  const { state, toCinematic } = useAccess();
+  const { state, completeCinematic } = useAccess();
   const sound = useSound();
-  const armed = useRef(false);
-  const [phase, setPhase] = useState<"lattice" | "zoom" | "airo" | "video" | "done">("lattice");
+  const [phase, setPhase] = useState<CinematicPhase>("lattice");
   const videoRef = useRef<HTMLVideoElement>(null);
+  const timeoutsRef = useRef<number[]>([]);
 
   const active = state === "cinematic";
-  const playSuccess = useRef(sound.play);
-  playSuccess.current = sound.play;
+
+  const handleFinish = useCallback(() => {
+    timeoutsRef.current.forEach(window.clearTimeout);
+    completeCinematic();
+  }, [completeCinematic]);
 
   useEffect(() => {
-    if (armed.current) return;
-    armed.current = true;
-    playSuccess.current("success");
+    if (!active) return;
 
-    // Phase 1 duration: ~1.6s
-    const t1 = window.setTimeout(() => setPhase("zoom"), 1600);
-    // Phase 2: Zoom into white light ~2s
-    const t2 = window.setTimeout(() => setPhase("airo"), 3600);
-    // Phase 3: AIRO video ~8s
-    const t3 = window.setTimeout(() => setPhase("video"), 13600);
-    // Phase 4: Command Center video ~8s, then transition to done (white box)
-    const t4 = window.setTimeout(() => setPhase("done"), 19600);
+    sound.play("success");
+
+    // Phase 1: Lattice grid sweep (~1.4s)
+    const t1 = window.setTimeout(() => setPhase("zoom"), 1400);
+    // Phase 2: Zoom white burst (~1.6s)
+    const t2 = window.setTimeout(() => setPhase("video"), 3000);
+    // Phase 3 fallback duration in case video metadata or onEnded doesn't fire (~12s)
+    const t3 = window.setTimeout(() => setPhase("outro"), 14000);
+    const t4 = window.setTimeout(() => handleFinish(), 15500);
+
+    timeoutsRef.current = [t1, t2, t3, t4];
 
     return () => {
-      armed.current = false; // Allow re-arm on remount (React 18 strict mode)
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
-      window.clearTimeout(t3);
-      window.clearTimeout(t4);
+      timeoutsRef.current.forEach(window.clearTimeout);
+      timeoutsRef.current = [];
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [active, sound, handleFinish]);
 
-  // Video handling for both airo and video phases
+  // Video playback handler
   useEffect(() => {
+    if (phase !== "video") return;
     const video = videoRef.current;
-    if (!video || (phase !== "airo" && phase !== "video")) return;
+    if (!video) return;
 
-    console.log("[CinematicTransition] Video phase started, playing:", video.src);
     video.currentTime = 0;
     const playPromise = video.play();
     if (playPromise !== undefined) {
       playPromise.catch(() => {
-        console.log("[CinematicTransition] Autoplay blocked, trying muted");
+        // Retry muted if browser blocked audio autoplay
         video.muted = true;
         video.play().catch(() => {});
       });
     }
-
-    return () => {};
   }, [phase]);
 
-  void sound;
-
-  console.log("[CinematicTransition] Render phase:", phase, "state:", state);
+  if (!active) return null;
 
   return (
     <AnimatePresence>
       <motion.div
-        key="cinematic"
+        key="cinematic-portal"
         className="fixed inset-0 z-50 overflow-hidden bg-[#050A0F]"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        transition={{ duration: 0.4, ease: easeInOut }}
-        aria-hidden="true"
+        transition={{ duration: 0.6, ease: easeInOut }}
+        role="region"
+        aria-label="Inauguration ceremony transition"
       >
-        {/* Phase 1: Lattice grid expand + cold flash + light sweep */}
+        {/* Skip button for quick navigation */}
+        <button
+          type="button"
+          onClick={handleFinish}
+          className="absolute top-6 right-6 z-50 inline-flex items-center gap-1 rounded-full border border-white/20 bg-black/40 px-4 py-2 text-xs font-mono uppercase tracking-[0.2em] text-[#F5F7FA]/80 backdrop-blur-md transition hover:border-[#00D4FF] hover:text-[#00D4FF]"
+          aria-label="Lewati transisi seremoni"
+        >
+          <span>Lewati</span>
+          <ChevronRight className="h-3.5 w-3.5" />
+        </button>
+
+        {/* Phase 1: Lattice grid expand + Cold Flash + Light Sweep */}
         {phase === "lattice" && (
-          <>
-            {/* Cold flash */}
+          <div className="absolute inset-0">
+            {/* Cold Flash */}
             <motion.div
               className="absolute inset-0 bg-[#DFF7FF]"
               initial={{ opacity: 0 }}
-              animate={{ opacity: [0, 0.9, 0] }}
+              animate={{ opacity: [0, 0.85, 0] }}
               transition={{ duration: 0.7, ease: "easeInOut" }}
             />
-            {/* Lattice grid expand */}
+            {/* Cyber Grid Lattice */}
             <motion.div
-              className="absolute inset-0 bg-[linear-gradient(rgba(0,212,255,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.16)_1px,transparent_1px)] bg-[size:48px_48px]"
-              initial={{ scale: 1.6, opacity: 0 }}
+              className="absolute inset-0 bg-[linear-gradient(rgba(0,212,255,0.18)_1px,transparent_1px),linear-gradient(90deg,rgba(0,212,255,0.18)_1px,transparent_1px)] bg-[size:40px_40px]"
+              initial={{ scale: 1.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 1.4, ease: easeInOut, delay: 0.1 }}
+              transition={{ duration: 1.2, ease: easeInOut }}
             />
-            {/* Light sweep */}
+            {/* Light Sweep */}
             <motion.div
-              className="absolute inset-y-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-[#F5F7FA]/25 to-transparent blur-md"
+              className="absolute inset-y-0 w-1/3 -skew-x-12 bg-gradient-to-r from-transparent via-[#00D4FF]/40 to-transparent blur-xl"
               initial={{ left: "-40%" }}
-              animate={{ left: "110%" }}
-              transition={{ duration: 1.2, ease: easeInOut, delay: 0.35 }}
+              animate={{ left: "120%" }}
+              transition={{ duration: 1.1, ease: easeInOut, delay: 0.2 }}
             />
-            {/* Brightness rise then settle */}
-            <motion.div
-              className="absolute inset-0 bg-[#050A0F]"
-              initial={{ opacity: 0.55 }}
-              animate={{ opacity: 0 }}
-              transition={{ duration: 1.6, ease: easeInOut, delay: 0.2 }}
-            />
-          </>
+          </div>
         )}
 
-        {/* Phase 2: Zoom into white light box */}
+        {/* Phase 2: Dimensional White Burst / Zoom */}
         {phase === "zoom" && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ scale: 1, opacity: 0 }}
-            animate={{ scale: [1, 50], opacity: [1, 1, 0] }}
-            transition={{ duration: 2, ease: easeInOut }}
+            className="absolute inset-0 flex items-center justify-center bg-[#050A0F]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4 }}
           >
             <motion.div
-              className="w-32 h-32 rounded-[24px] bg-white/90 shadow-[0_0_120px_40px_rgba(255,255,255,0.8),0_0_200px_80px_rgba(0,212,255,0.4)]"
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, ease: easeOut }}
+              className="w-24 h-24 rounded-2xl bg-white shadow-[0_0_140px_60px_rgba(0,212,255,0.7)]"
+              initial={{ scale: 0.2, opacity: 0 }}
+              animate={{ scale: [0.2, 1, 35], opacity: [0, 1, 0.9] }}
+              transition={{ duration: 1.5, ease: easeInOut }}
             />
           </motion.div>
         )}
 
-        {/* Phase 3: AIRO video playback */}
-        {phase === "airo" && (
-          <motion.div
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
-          >
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              playsInline
-              autoPlay
-              preload="auto"
-              disablePictureInPicture
-              onEnded={(e) => {
-                const video = e.currentTarget;
-                video.pause();
-                video.currentTime = video.duration ;
-              }}
-            >
-              <source src="/video/airo-airi.mp4" type="video/mp4" />
-            </video>
-            {/* Subtle vignette overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050A0F]/60 via-transparent to-[#050A0F]/40" />
-          </motion.div>
-        )}
-
-        {/* Phase 4: Command Center video playback */}
+        {/* Phase 3: High-Definition Inauguration Video */}
         {phase === "video" && (
           <motion.div
             className="absolute inset-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.6 }}
           >
             <video
               ref={videoRef}
-              className="w-full h-full object-cover"
+              className="h-full w-full object-cover"
               playsInline
-              muted
               autoPlay
               preload="auto"
-              disablePictureInPicture
-              onEnded={(e) => {
-                const video = e.currentTarget;
-                video.pause();
-                // Seek to last frame (duration - small epsilon)
-                video.currentTime = video.duration - 0.1;
+              onEnded={() => {
+                setPhase("outro");
+                setTimeout(handleFinish, 800);
               }}
             >
-              <source src="/video/command-center-drone-ai.mp4" type="video/mp4" />
+              <source src="/video/airo-airi.mp4" type="video/mp4" />
             </video>
-            {/* Subtle vignette overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#050A0F]/60 via-transparent to-[#050A0F]/40" />
+            {/* Subtle Vignette */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050A0F] via-transparent to-[#050A0F]/60 pointer-events-none" />
           </motion.div>
         )}
 
-        {/* Phase 5: Done - white box fade out */}
-        {/* {phase === "done" && (
+        {/* Phase 4: Smooth Outro Dissolve */}
+        {phase === "outro" && (
           <motion.div
-            className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ duration: 1.5, ease: easeInOut }}
-          >
-            <motion.div
-              className="w-32 h-32 rounded-[24px] bg-white/90 shadow-[0_0_120px_40px_rgba(255,255,255,0.8),0_0_200px_80px_rgba(0,212,255,0.4)]"
-              initial={{ scale: 1, opacity: 1 }}
-              animate={{ scale: 50, opacity: 0 }}
-              transition={{ duration: 1.5, ease: easeInOut }}
-            />
-          </motion.div>
-        )} */}
+            className="absolute inset-0 bg-[#050A0F]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, ease: easeOut }}
+          />
+        )}
       </motion.div>
     </AnimatePresence>
   );

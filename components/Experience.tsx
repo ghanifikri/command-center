@@ -11,59 +11,60 @@ import EventExperience from "@/components/event/EventExperience";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { useAccess } from "@/lib/access-machine";
 
-/** State-machine → screen mapper. Renders exactly the layer for the current state. */
+/**
+ * State-machine driven layer coordinator.
+ * Canonical progression:
+ * LANDING / PIN / VERIFYING / DENIED -> GRANTED -> VOICE / ACTIVATION -> CINEMATIC -> EVENT.
+ */
 export default function Experience() {
   const { state } = useAccess();
 
-  const showLanding = state === "landing" || state === "pin" || state === "verifying" || state === "denied";
-  const showEvent = state === "event";
+  const isLandingFlow =
+    state === "landing" ||
+    state === "pin" ||
+    state === "verifying" ||
+    state === "denied";
 
   return (
-    <>
-      {/* Landing layer */}
+    <ErrorBoundary>
+      {/* 1. Landing & Modal Layer */}
       <AnimatePresence>
-        {showLanding && (
+        {isLandingFlow && (
           <motion.div
-            key="landing"
+            key="landing-layer"
             className="fixed inset-0 z-10 overflow-hidden bg-[#050A0F]"
             initial={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0.5 }}
           >
             <VideoHero />
             <Landing />
+            <AccessModal />
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Ceremony layers — one screen per machine state, mounted directly.
-          No AnimatePresence exit here: each screen animates in on mount and the
-          layer swap is abrupt-but-dark, which reads as a deliberate hard cut
-          between ceremonial beats rather than a lingering crossfade that can
-          leave a stuck fullscreen overlay. */}
-      <AccessModal />
+      {/* 2. Access Granted Screen */}
       {state === "granted" && <AccessGranted />}
-      {state === "voice" && <SystemActivation />}
 
-      {/* Event layer */}
-            {showEvent && (
-              <ErrorBoundary>
-                <motion.div
-                  key="event"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 0.8 }}
-                  className="min-h-screen bg-[#050A0F]"
-                >
-                  {/* Background video — same semi-transparent landing video continues through event page */}
-                  <VideoHero />
-                  <EventExperience />
-                </motion.div>
-              </ErrorBoundary>
-            )}
+      {/* 3. System Activation Sequence */}
+      {(state === "voice" || state === "activation") && <SystemActivation />}
 
-      {/* Cinematic layer — plays after event page */}
+      {/* 4. Cinematic Transition */}
       {state === "cinematic" && <CinematicTransition />}
-    </>
+
+      {/* 5. Full Event Experience Page */}
+      {state === "event" && (
+        <motion.div
+          key="event-layer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.8 }}
+          className="min-h-screen bg-[#050A0F]"
+        >
+          <EventExperience />
+        </motion.div>
+      )}
+    </ErrorBoundary>
   );
 }
