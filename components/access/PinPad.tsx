@@ -19,29 +19,14 @@ export default function PinPad() {
 
   const renderKey = (key: Key) => {
     const isBack = key === "back";
-    const isOk = key === "ok";
+    const isBlank = key === "blank" || key === "";
 
-    if (isOk) {
+    if (isBlank) {
       return (
-        <motion.button
-          type="button"
-          onClick={() => press("ok")}
-          disabled={!isReadyToSubmit}
-          whileTap={{ scale: isReadyToSubmit ? 0.94 : 1 }}
-          aria-label="Confirm access code"
-          className={cn(
-            "flex h-[68px] sm:h-[78px] w-full flex-col items-center justify-center rounded-2xl border transition-all duration-200",
-            isReadyToSubmit
-              ? "border-[#00E5A0] bg-[#00E5A0]/25 text-[#00E5A0] shadow-[0_0_25px_rgba(0,229,160,0.45)] hover:bg-[#00E5A0]/35 hover:scale-[1.02] cursor-pointer"
-              : "border-[#1B2A36] bg-[#07111D]/40 text-[#8B98A5]/30 opacity-35 cursor-not-allowed",
-            "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00E5A0]"
-          )}
-        >
-          <Check className={cn("h-7 w-7 stroke-[2.5]", isReadyToSubmit ? "text-[#00E5A0]" : "text-[#8B98A5]/40")} />
-          <span className="mt-1 font-mono text-[0.6rem] font-black tracking-wider uppercase">
-            ENTER
-          </span>
-        </motion.button>
+        <div
+          aria-hidden="true"
+          className="flex h-[68px] sm:h-[78px] w-full items-center justify-center rounded-2xl border border-transparent"
+        />
       );
     }
 

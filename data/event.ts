@@ -46,7 +46,15 @@ export const secureAccess = {
   heading: "AUTHORIZATION REQUIRED",
   prompt: `ENTER ${access.code.length}-DIGIT ACCESS CODE`,
   placeholders: access.code.length,
-  keypad: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "back", "0", "ok"],
+  keypad: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "blank", "0", "back"],
+  launchConsole: {
+    badge: "AI PROTOCOL // ONLINE",
+    title: "RESMIKAN SEKARANG",
+    subtitle: "INITIALIZE COMMAND CENTER",
+    description: "OTORISASI LENGKAP · SIAP UNTUK PERESMIAN",
+    pressPrompt: "PRESS TO LAUNCH CEREMONY",
+    statusArmed: "SYSTEM ARMED & LINKED",
+  },
   wrongPin: {
     title: "ACCESS DENIED",
     message: "INVALID AUTHORIZATION CODE",
@@ -95,7 +103,7 @@ export const activation = {
   init: "INITIALIZING COMMAND CENTER",
   config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 100 },
+    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1000 },
     { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 100 },
     { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 100 },
     { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 100 },
