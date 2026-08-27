@@ -48,7 +48,7 @@ export default function EventHero() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.8, delay: 0.85 }}
-        className="relative mt-3 text-[0.78rem] font-light tracking-[0.3em] text-[#C9A96E]"
+        className="relative mt-3 text-[0.85rem] font-bold tracking-[0.3em] text-[#C9A96E]"
       >
         {eventHero.date}
       </motion.p>

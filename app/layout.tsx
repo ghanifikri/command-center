@@ -39,6 +39,7 @@ export default function RootLayout({
     <html
       lang="id"
       className={`${inter.variable} ${spaceGrotesk.variable} h-full`}
+      suppressHydrationWarning
     >
       <body className="min-h-full bg-[#050A0F] text-[#F5F7FA]">
         <ProviderTree>{children}</ProviderTree>

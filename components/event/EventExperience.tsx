@@ -34,7 +34,7 @@ function Details() {
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-10 sm:grid-cols-3">
           <div>
             <p className="text-[0.62rem] font-medium uppercase tracking-[0.3em] text-[#00D4FF]">Date</p>
-            <p className="mt-3 font-display text-xl font-light tracking-wide text-[#F5F7FA]">
+            <p className="mt-3 font-display text-xl font-bold tracking-wide text-[#F5F7FA]">
               {details.date}
             </p>
           </div>

@@ -66,7 +66,7 @@ export default function Landing() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="mt-4 text-[0.78rem] font-light uppercase tracking-[0.34em] text-[#8B98A5]"
+          className="mt-4 text-[0.85rem] font-bold uppercase tracking-[0.34em] text-[#F5F7FA]"
         >
           {landing.date}
         </motion.p>
