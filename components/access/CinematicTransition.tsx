@@ -18,7 +18,7 @@ export default function CinematicTransition() {
   const { state, toCinematic } = useAccess();
   const sound = useSound();
   const armed = useRef(false);
-  const [phase, setPhase] = useState<"lattice" | "zoom" | "video" | "done">("lattice");
+  const [phase, setPhase] = useState<"lattice" | "zoom" | "airo" | "video" | "done">("lattice");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   const active = state === "cinematic";
@@ -33,25 +33,26 @@ export default function CinematicTransition() {
     // Phase 1 duration: ~1.6s
     const t1 = window.setTimeout(() => setPhase("zoom"), 1600);
     // Phase 2: Zoom into white light ~2s
-    const t2 = window.setTimeout(() => setPhase("video"), 3600);
-    // Phase 3: Video plays then pauses on last frame — NO auto-transition to done
-    // const t3 = window.setTimeout(() => {
-    //   setPhase("done");
-    // }, 11000);
+    const t2 = window.setTimeout(() => setPhase("airo"), 3600);
+    // Phase 3: AIRO video ~8s
+    const t3 = window.setTimeout(() => setPhase("video"), 13600);
+    // Phase 4: Command Center video ~8s, then transition to done (white box)
+    const t4 = window.setTimeout(() => setPhase("done"), 19600);
 
     return () => {
       armed.current = false; // Allow re-arm on remount (React 18 strict mode)
       window.clearTimeout(t1);
       window.clearTimeout(t2);
-      // window.clearTimeout(t3);
+      window.clearTimeout(t3);
+      window.clearTimeout(t4);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Video handling
+  // Video handling for both airo and video phases
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || phase !== "video") return;
+    if (!video || (phase !== "airo" && phase !== "video")) return;
 
     console.log("[CinematicTransition] Video phase started, playing:", video.src);
     video.currentTime = 0;
@@ -64,19 +65,7 @@ export default function CinematicTransition() {
       });
     }
 
-    // Fallback: if video doesn't end (e.g., loop or error), transition after 8s
-    // REMOVED: video now pauses on last frame and stays there indefinitely
-    // const fallbackTimer = window.setTimeout(() => {
-    //   console.log("[CinematicTransition] Fallback timer fired");
-    //   if (phase === "video") {
-    //     setPhase("done");
-    //   }
-    // }, 8000);
-
-    return () => {
-      // video.removeEventListener("ended", onEnded);
-      // window.clearTimeout(fallbackTimer);
-    };
+    return () => {};
   }, [phase]);
 
   void sound;
@@ -145,7 +134,35 @@ export default function CinematicTransition() {
           </motion.div>
         )}
 
-        {/* Phase 3: Video playback */}
+        {/* Phase 3: AIRO video playback */}
+        {phase === "airo" && (
+          <motion.div
+            className="absolute inset-0"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.5 }}
+          >
+            <video
+              ref={videoRef}
+              className="w-full h-full object-cover"
+              playsInline
+              autoPlay
+              preload="auto"
+              disablePictureInPicture
+              onEnded={(e) => {
+                const video = e.currentTarget;
+                video.pause();
+                video.currentTime = video.duration ;
+              }}
+            >
+              <source src="/video/airo-airi.mp4" type="video/mp4" />
+            </video>
+            {/* Subtle vignette overlay */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#050A0F]/60 via-transparent to-[#050A0F]/40" />
+          </motion.div>
+        )}
+
+        {/* Phase 4: Command Center video playback */}
         {phase === "video" && (
           <motion.div
             className="absolute inset-0"
@@ -175,13 +192,13 @@ export default function CinematicTransition() {
           </motion.div>
         )}
 
-        {/* Phase 4: Done - hold white for a moment then could transition if needed */}
+        {/* Phase 5: Done - white box fade out */}
         {/* {phase === "done" && (
           <motion.div
             className="absolute inset-0 flex items-center justify-center"
             initial={{ opacity: 1 }}
             animate={{ opacity: 0 }}
-            transition={{ duration: 1, delay: 1 }}
+            transition={{ duration: 1.5, ease: easeInOut }}
           >
             <motion.div
               className="w-32 h-32 rounded-[24px] bg-white/90 shadow-[0_0_120px_40px_rgba(255,255,255,0.8),0_0_200px_80px_rgba(0,212,255,0.4)]"
