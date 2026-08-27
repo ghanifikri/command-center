@@ -8,9 +8,60 @@ import { easeInOut, easeOut } from "@/lib/motion";
 import { event } from "@/data/event";
 
 /**
+ * Centered Minimalist Typography Content:
+ * Rendered inside both the left and right panels with precise viewport-offset
+ * so the text physically splits in half and glides away with each door!
+ */
+function CenterpieceContent() {
+  return (
+    <div className="flex h-full w-full flex-col items-center justify-center px-8 sm:px-16 text-center select-none">
+      {/* Clean, Understated Pill */}
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8 }}
+        className="mb-6 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1.5 backdrop-blur-md"
+      >
+        <span className="h-1.5 w-1.5 rounded-full bg-[#00D4FF]" />
+        <span className="font-mono text-[0.65rem] sm:text-xs uppercase tracking-[0.32em] text-[#A0AEC0]">
+          GRAND INAUGURATION
+        </span>
+      </motion.div>
+
+      {/* Clean, Bold, Minimal Headline */}
+      <motion.h1
+        initial={{ letterSpacing: "0.15em", opacity: 0, y: 12 }}
+        animate={{ letterSpacing: "0.22em", opacity: 1, y: 0 }}
+        transition={{ duration: 1.2, ease: easeOut }}
+        className="font-display text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold uppercase leading-tight text-[#F5F7FA] max-w-5xl"
+      >
+        THE FUTURE STARTS HERE
+      </motion.h1>
+
+      {/* Razor-Thin Minimalist Line */}
+      <motion.div
+        initial={{ width: 0, opacity: 0 }}
+        animate={{ width: "100px", opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.3 }}
+        className="my-6 h-px bg-white/30"
+      />
+
+      {/* Sub-label */}
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8, delay: 0.4 }}
+        className="font-mono text-[0.65rem] sm:text-xs uppercase tracking-[0.28em] text-[#8B98A5]"
+      >
+        PT KRAKATAU TIRTA INDUSTRI
+      </motion.p>
+    </div>
+  );
+}
+
+/**
  * Sleek Minimalist Executive Gate & Cinematic Reveal:
- * - Minimalist architectural monolithic dark panels with hairline seam
- * - Refined, elegant typography for "THE FUTURE STARTS HERE" without visual noise
+ * - The text & elements physically split down the center and slide open WITH the gate!
  * - Smooth luxury sliding panel opening timed with voice audio
  * - Frame 0 pre-rendered video standby (0-50% door open) and active play at 50% open
  */
@@ -133,7 +184,7 @@ export default function CinematicTransition() {
         </div>
 
         {/* =======================================================================
-            LAYER 1: Sleek Minimalist Architectural Monolith Panels
+            LAYER 1: Left & Right Split Monolith Panels (Text splits WITH the doors!)
            ======================================================================= */}
         <div className="pointer-events-none absolute inset-0 flex overflow-hidden">
           {/* LEFT SLIDING PANEL */}
@@ -141,15 +192,15 @@ export default function CinematicTransition() {
             initial={{ x: 0 }}
             animate={{ x: doorOpen ? "-101%" : 0 }}
             transition={{ duration: 1.4, ease: [0.76, 0, 0.24, 1] }}
-            className="relative h-full w-1/2 bg-[#05080C] border-r border-white/10 shadow-[20px_0_60px_rgba(0,0,0,0.9)] flex flex-col justify-between p-8 sm:p-12"
+            className="relative h-full w-1/2 bg-[#05080C] border-r border-white/10 shadow-[20px_0_60px_rgba(0,0,0,0.9)] overflow-hidden"
           >
-            {/* Subtle Minimal Corner Label */}
-            <div className="font-mono text-[0.62rem] tracking-[0.3em] uppercase text-[#5A6B7C]">
-              SEC.01
+            {/* Left-half cropped viewport container (anchored at left: 0) */}
+            <div className="absolute left-0 top-0 h-screen w-[100vw]">
+              <CenterpieceContent />
             </div>
 
-            {/* Bottom Minimalist Brand Label */}
-            <div className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-[#8B98A5]">
+            {/* Bottom Left Corner Label */}
+            <div className="absolute left-8 bottom-8 font-mono text-[0.65rem] tracking-[0.25em] uppercase text-[#8B98A5]">
               PT KRAKATAU TIRTA INDUSTRI
             </div>
           </motion.div>
@@ -159,79 +210,25 @@ export default function CinematicTransition() {
             initial={{ x: 0 }}
             animate={{ x: doorOpen ? "101%" : 0 }}
             transition={{ duration: 1.4, ease: [0.76, 0, 0.24, 1] }}
-            className="relative h-full w-1/2 bg-[#05080C] border-l border-white/10 shadow-[-20px_0_60px_rgba(0,0,0,0.9)] flex flex-col justify-between p-8 sm:p-12 text-right"
+            className="relative h-full w-1/2 bg-[#05080C] border-l border-white/10 shadow-[-20px_0_60px_rgba(0,0,0,0.9)] overflow-hidden"
           >
-            {/* Subtle Minimal Corner Label */}
-            <div className="font-mono text-[0.62rem] tracking-[0.3em] uppercase text-[#5A6B7C]">
-              SEC.02
+            {/* Right-half cropped viewport container (offset by -50vw so center matches left border) */}
+            <div className="absolute -left-[50vw] top-0 h-screen w-[100vw]">
+              <CenterpieceContent />
             </div>
 
-            {/* Bottom Minimalist Brand Label */}
-            <div className="font-mono text-[0.65rem] tracking-[0.25em] uppercase text-[#8B98A5]">
+            {/* Bottom Right Corner Label */}
+            <div className="absolute right-8 bottom-8 font-mono text-[0.65rem] tracking-[0.25em] uppercase text-[#8B98A5]">
               IT COMMAND CENTER
             </div>
-          </motion.div>
-
-          {/* =======================================================================
-              CENTERPIECE: CLEAN, REFINED & MINIMALIST TYPOGRAPHY
-             ======================================================================= */}
-          <motion.div
-            initial={{ opacity: 1 }}
-            animate={{
-              opacity: doorOpen ? 0 : 1,
-              scale: doorOpen ? 0.96 : 1,
-            }}
-            transition={{ duration: 0.6, ease: "easeOut" }}
-            className="pointer-events-none absolute inset-0 z-30 flex flex-col items-center justify-center px-6 text-center"
-          >
-            {/* Clean, Understated Pill */}
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.04] px-4 py-1 backdrop-blur-md"
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-[#00D4FF]" />
-              <span className="font-mono text-[0.65rem] uppercase tracking-[0.32em] text-[#A0AEC0]">
-                GRAND INAUGURATION
-              </span>
-            </motion.div>
-
-            {/* Clean, Bold, Minimal Headline */}
-            <motion.h1
-              initial={{ letterSpacing: "0.2em", opacity: 0, y: 12 }}
-              animate={{ letterSpacing: "0.32em", opacity: 1, y: 0 }}
-              transition={{ duration: 1.2, ease: easeOut }}
-              className="font-display text-3xl sm:text-5xl md:text-6xl font-bold uppercase leading-tight text-[#F5F7FA]"
-            >
-              THE FUTURE STARTS HERE
-            </motion.h1>
-
-            {/* Razor-Thin Minimalist Line */}
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ width: "90px", opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.3 }}
-              className="my-5 h-px bg-white/30"
-            />
-
-            {/* Sub-label */}
-            <motion.p
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="font-mono text-[0.68rem] uppercase tracking-[0.28em] text-[#8B98A5]"
-            >
-              PT KRAKATAU TIRTA INDUSTRI
-            </motion.p>
           </motion.div>
 
           {/* Ultra-Fine Hairline Laser Seam in the Center */}
           {!doorOpen && (
             <motion.div
-              animate={{ opacity: [0.3, 0.7, 0.3] }}
+              animate={{ opacity: [0.3, 0.8, 0.3] }}
               transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-              className="pointer-events-none absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#00D4FF]/70 to-transparent"
+              className="pointer-events-none absolute left-1/2 top-0 bottom-0 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#00D4FF]/70 to-transparent z-40"
             />
           )}
         </div>
