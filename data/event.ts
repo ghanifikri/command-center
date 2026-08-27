@@ -62,6 +62,8 @@ export const authSeq = {
   granted: "ACCESS",
   grantedState: "GRANTED",
   durationMs: 2000,
+  /** Durasi tampilan layar ACCESS GRANTED sebelum beralih ke aktivasi sistem (2000 = 2 detik) */
+  grantedDurationMs: 3700,
 } as const;
 
 export const voice = {
