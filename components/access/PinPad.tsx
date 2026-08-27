@@ -10,7 +10,7 @@ import { EASE } from "@/lib/motion";
 type Key = string;
 
 /**
- * Pure numeric 3x4 cybernetic keypad with large, clean digits and tactile feedback.
+ * Pure numeric 3x4 cybernetic keypad with maximized button sizing, minimal gaps, and tactile feedback.
  */
 export default function PinPad() {
   const { press, pin } = useAccess();
@@ -27,18 +27,18 @@ export default function PinPad() {
           type="button"
           onClick={() => press("ok")}
           disabled={!isReadyToSubmit}
-          whileTap={{ scale: isReadyToSubmit ? 0.92 : 1 }}
+          whileTap={{ scale: isReadyToSubmit ? 0.94 : 1 }}
           aria-label="Confirm access code"
           className={cn(
-            "flex h-16 w-16 sm:h-[72px] sm:w-[72px] flex-col items-center justify-center rounded-2xl border transition-all duration-200",
+            "flex h-[68px] sm:h-[78px] w-full flex-col items-center justify-center rounded-2xl border transition-all duration-200",
             isReadyToSubmit
-              ? "border-[#00E5A0] bg-[#00E5A0]/20 text-[#00E5A0] shadow-[0_0_20px_rgba(0,229,160,0.4)] hover:bg-[#00E5A0]/30 hover:scale-105 cursor-pointer"
+              ? "border-[#00E5A0] bg-[#00E5A0]/25 text-[#00E5A0] shadow-[0_0_25px_rgba(0,229,160,0.45)] hover:bg-[#00E5A0]/35 hover:scale-[1.02] cursor-pointer"
               : "border-[#1B2A36] bg-[#07111D]/40 text-[#8B98A5]/30 opacity-35 cursor-not-allowed",
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00E5A0]"
           )}
         >
-          <Check className={cn("h-6 w-6 stroke-[2.5]", isReadyToSubmit ? "text-[#00E5A0]" : "text-[#8B98A5]/40")} />
-          <span className="mt-0.5 font-mono text-[0.55rem] font-bold tracking-wider uppercase">
+          <Check className={cn("h-7 w-7 stroke-[2.5]", isReadyToSubmit ? "text-[#00E5A0]" : "text-[#8B98A5]/40")} />
+          <span className="mt-1 font-mono text-[0.6rem] font-black tracking-wider uppercase">
             ENTER
           </span>
         </motion.button>
@@ -50,16 +50,16 @@ export default function PinPad() {
         <motion.button
           type="button"
           onClick={() => press("back")}
-          whileTap={{ scale: 0.92 }}
+          whileTap={{ scale: 0.94 }}
           aria-label="Delete last digit"
           className={cn(
-            "flex h-16 w-16 sm:h-[72px] sm:w-[72px] flex-col items-center justify-center rounded-2xl border border-[#1B2A36] bg-[#07111D]/60 text-[#8B98A5] transition-all duration-200",
-            "hover:border-[#FF4D5A]/50 hover:bg-[#FF4D5A]/10 hover:text-[#FF4D5A] hover:shadow-[0_0_15px_rgba(255,77,90,0.2)]",
+            "flex h-[68px] sm:h-[78px] w-full flex-col items-center justify-center rounded-2xl border border-[#1B2A36] bg-[#07111D]/70 text-[#8B98A5] transition-all duration-200",
+            "hover:border-[#FF4D5A]/50 hover:bg-[#FF4D5A]/15 hover:text-[#FF4D5A] hover:shadow-[0_0_20px_rgba(255,77,90,0.25)]",
             "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FF4D5A]"
           )}
         >
-          <Delete className="h-5 w-5" />
-          <span className="mt-0.5 font-mono text-[0.55rem] tracking-wider uppercase">
+          <Delete className="h-6 w-6" />
+          <span className="mt-1 font-mono text-[0.6rem] font-bold tracking-wider uppercase">
             DEL
           </span>
         </motion.button>
@@ -70,15 +70,15 @@ export default function PinPad() {
       <motion.button
         type="button"
         onClick={() => press(key)}
-        whileTap={{ scale: 0.92 }}
+        whileTap={{ scale: 0.94 }}
         aria-label={`Digit ${key}`}
         className={cn(
-          "relative flex h-16 w-16 sm:h-[72px] sm:w-[72px] items-center justify-center rounded-2xl border border-[#1B2A36] bg-[#07111D]/75 backdrop-blur-md transition-all duration-200",
-          "hover:border-[#00D4FF]/60 hover:bg-[#00D4FF]/10 hover:shadow-[0_0_20px_rgba(0,212,255,0.25)] hover:scale-[1.03]",
+          "relative flex h-[68px] sm:h-[78px] w-full items-center justify-center rounded-2xl border border-[#1B2A36]/80 bg-[#07111D]/80 backdrop-blur-md transition-all duration-200",
+          "hover:border-[#00D4FF]/70 hover:bg-[#00D4FF]/15 hover:shadow-[0_0_25px_rgba(0,212,255,0.3)] hover:scale-[1.02]",
           "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#00D4FF]"
         )}
       >
-        <span className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#F5F7FA]">
+        <span className="font-display text-3xl sm:text-4xl font-extrabold tracking-tight text-[#F5F7FA]">
           {key}
         </span>
       </motion.button>
@@ -89,14 +89,15 @@ export default function PinPad() {
     <div
       role="group"
       aria-label="Access code keypad"
-      className="grid grid-cols-3 gap-3.5 sm:gap-4 justify-items-center mx-auto"
+      className="grid w-full grid-cols-3 gap-2 sm:gap-2.5 mx-auto"
     >
       {keys.map((k, i) => (
         <motion.div
           key={k}
+          className="w-full"
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: i * 0.02, ease: EASE }}
+          transition={{ duration: 0.25, delay: i * 0.015, ease: EASE }}
         >
           {renderKey(k)}
         </motion.div>

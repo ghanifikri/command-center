@@ -81,7 +81,7 @@ export default function AccessModal() {
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 10 }}
           transition={{ duration: 0.4, ease: easeOut }}
-          className="relative w-full max-w-[420px] overflow-hidden rounded-3xl border border-[#00D4FF]/30 bg-[#07111D]/90 p-6 shadow-[0_0_60px_rgba(0,212,255,0.15)] backdrop-blur-2xl sm:p-8"
+          className="relative w-full max-w-[450px] sm:max-w-[470px] overflow-hidden rounded-3xl border border-[#00D4FF]/30 bg-[#07111D]/95 p-6 shadow-[0_0_60px_rgba(0,212,255,0.15)] backdrop-blur-2xl sm:p-7"
         >
           {/* Sci-Fi Corner Brackets */}
           <div className="pointer-events-none absolute left-3 top-3 h-3.5 w-3.5 border-l-2 border-t-2 border-[#00D4FF]" />
