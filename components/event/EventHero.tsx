@@ -1,10 +1,89 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { Sparkles, Calendar, Award, Terminal, Radio } from "lucide-react";
 import { eventHero } from "@/data/event";
 import { easeOut, EASE } from "@/lib/motion";
+
+const GLYPHS = "010101KTI#$<>[]{}/*+=!~_?%&01924ABCDEF";
+
+function HackerGlitchChar({
+  targetChar,
+  charIndex,
+}: {
+  targetChar: string;
+  charIndex: number;
+}) {
+  const [displayChar, setDisplayChar] = useState(targetChar);
+  const [isDecrypted, setIsDecrypted] = useState(false);
+  const [isGlitching, setIsGlitching] = useState(false);
+
+  useEffect(() => {
+    let frame = 0;
+    const totalFrames = 10;
+    const startDelay = 180 + charIndex * 40;
+
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        if (frame < totalFrames) {
+          setDisplayChar(GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
+          frame++;
+        } else {
+          setDisplayChar(targetChar);
+          setIsDecrypted(true);
+          clearInterval(interval);
+        }
+      }, 35);
+    }, startDelay);
+
+    return () => clearTimeout(timer);
+  }, [targetChar, charIndex]);
+
+  // Periodic subtle cyber glitch pulse
+  useEffect(() => {
+    if (!isDecrypted) return;
+    const glitchInterval = setInterval(() => {
+      if (Math.random() < 0.25) {
+        setIsGlitching(true);
+        setTimeout(() => setIsGlitching(false), 90);
+      }
+    }, 2200 + (charIndex % 3) * 600);
+    return () => clearInterval(glitchInterval);
+  }, [isDecrypted, charIndex]);
+
+  return (
+    <motion.span
+      initial={{
+        opacity: 0,
+        y: 30,
+        scale: 0.85,
+        filter: "blur(6px)",
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        scale: isGlitching ? [1, 1.05, 0.97, 1] : 1,
+        filter: "blur(0px)",
+        x: isGlitching ? [-2, 3, -1, 0] : 0,
+      }}
+      transition={{
+        duration: 0.5,
+        delay: 0.2 + charIndex * 0.045,
+        ease: [0.215, 0.61, 0.355, 1],
+      }}
+      className={`inline-block font-display text-[clamp(3.2rem,10.5vw,7.6rem)] font-black uppercase leading-[0.92] tracking-[0.06em] select-none transition-colors duration-100 ${
+        !isDecrypted
+          ? "text-[#00D4FF] drop-shadow-[0_0_25px_#00D4FF]"
+          : isGlitching
+          ? "text-[#00E5A0] drop-shadow-[3px_0_0_#00D4FF,-3px_0_0_#FF0055]"
+          : "bg-gradient-to-b from-[#FFFFFF] via-[#E8F4FA] to-[#8FA7B8] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(0,212,255,0.35)]"
+      }`}
+    >
+      {displayChar}
+    </motion.span>
+  );
+}
 
 /**
  * Trapcode-style 3D Undulating Particle Grid Field (Background Ambience)
@@ -215,27 +294,37 @@ export default function EventHero() {
         <Sparkles className="h-4 w-4 text-[#FFD700] animate-pulse" />
       </motion.div>
 
-      {/* Main Title: Razor-Sharp, Luxurious Metallic Gradient Typography */}
+      {/* Main Title: Letter-by-Letter Cinematic Laser Reveal */}
       <div className="relative z-10 my-3 overflow-visible">
         {/* Anamorphic Laser Flare Beam Sweeping Across Title */}
         <motion.div
           aria-hidden="true"
           initial={{ left: "-40%", opacity: 0 }}
-          animate={{ left: "140%", opacity: [0, 1, 0] }}
-          transition={{ duration: 1.8, delay: 0.4, ease: "easeInOut" }}
-          className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-1 w-72 bg-gradient-to-r from-transparent via-[#00D4FF] to-transparent blur-[2px] z-30"
+          animate={{ left: "140%", opacity: [0, 1, 1, 0] }}
+          transition={{ duration: 1.8, delay: 0.25, ease: "easeInOut" }}
+          className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] w-80 bg-gradient-to-r from-transparent via-[#00D4FF] via-white to-transparent blur-[1px] shadow-[0_0_25px_#00D4FF] z-30"
         />
 
-        <motion.h1
-          initial={{ opacity: 0, scale: 0.92, y: 15 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ duration: 1, ease: EASE, delay: 0.3 }}
-          className="font-display text-[clamp(3.2rem,10vw,7.4rem)] font-black uppercase leading-[0.92] tracking-[0.06em] text-[#F5F7FA] drop-shadow-[0_0_40px_rgba(0,212,255,0.4)]"
-        >
-          <span className="bg-gradient-to-b from-[#FFFFFF] via-[#E8F4FA] to-[#8FA7B8] bg-clip-text text-transparent">
-            {eventHero.title}
-          </span>
-        </motion.h1>
+        <div className="relative flex flex-col items-center justify-center select-none overflow-visible">
+          {eventHero.title.split(" ").map((word, wIdx, arr) => {
+            // Calculate base index for stagger timing
+            const baseCharIndex = wIdx === 0 ? 0 : arr[0].length;
+            return (
+              <div key={`${word}-${wIdx}`} className="flex items-center justify-center overflow-visible">
+                {word.split("").map((char, cIdx) => {
+                  const charIndex = baseCharIndex + cIdx;
+                  return (
+                    <HackerGlitchChar
+                      key={`${word}-${char}-${charIndex}`}
+                      targetChar={char}
+                      charIndex={charIndex}
+                    />
+                  );
+                })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Prestigious Company Ribbon */}
