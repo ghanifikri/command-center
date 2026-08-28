@@ -51,47 +51,100 @@ function CyberRGBGlitchTitle({ title }: { title: string }) {
     });
   }, [title]);
 
-  // 2. High-Frequency Cyber RGB Glitch Spasm Engine
+  // 2. Ultra-Fast 4-Flicker Cyber RGB Glitch Engine with Short Random Intervals
   useEffect(() => {
-    const triggerGlitch = () => {
-      const top = Math.floor(Math.random() * 60) + 10;
-      const height = Math.floor(Math.random() * 35) + 15;
-      setGlitchSliceTop(`${top}%`);
-      setGlitchSliceHeight(`${height}%`);
-      setGlitchActive(true);
+    let timeoutId: NodeJS.Timeout;
+    let isRunning = true;
 
-      // Random temporary letter scramble on 1-2 random characters during glitch
-      const totalChars = title.replace(/\s+/g, "").length;
-      const randomChar1 = `${Math.floor(Math.random() * totalChars)}`;
-      const randomChar2 = `${Math.floor(Math.random() * totalChars)}`;
-      setScrambleMap((prev) => ({
-        ...prev,
-        [randomChar1]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-        [randomChar2]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
-      }));
-
-      // End glitch after 130ms
-      setTimeout(() => {
-        setGlitchActive(false);
-        // Restore characters
-        let idx = 0;
-        const restored: Record<string, string> = {};
-        words.forEach((w) => {
-          w.split("").forEach((c) => {
-            restored[`${idx}`] = c;
-            idx++;
-          });
+    const restoreAllChars = () => {
+      let idx = 0;
+      const restored: Record<string, string> = {};
+      words.forEach((w) => {
+        w.split("").forEach((c) => {
+          restored[`${idx}`] = c;
+          idx++;
         });
-        setScrambleMap(restored);
-      }, 130);
+      });
+      setScrambleMap(restored);
     };
 
-    // Frequent rhythmic glitch bursts every 1.7s
-    const interval = setInterval(() => {
-      triggerGlitch();
-    }, 1700);
+    const trigger4FlickerGlitch = () => {
+      if (!isRunning) return;
 
-    return () => clearInterval(interval);
+      const totalChars = title.replace(/\s+/g, "").length;
+
+      const doFlicker = () => {
+        if (!isRunning) return;
+        const top = Math.floor(Math.random() * 65) + 5;
+        const height = Math.floor(Math.random() * 35) + 15;
+        setGlitchSliceTop(`${top}%`);
+        setGlitchSliceHeight(`${height}%`);
+        setGlitchActive(true);
+
+        const r1 = `${Math.floor(Math.random() * totalChars)}`;
+        const r2 = `${Math.floor(Math.random() * totalChars)}`;
+        const r3 = `${Math.floor(Math.random() * totalChars)}`;
+        setScrambleMap((prev) => ({
+          ...prev,
+          [r1]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+          [r2]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+          [r3]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+        }));
+      };
+
+      // 4 Rapid Stutter Flickers in tight sequence (~220ms total)
+      // Flicker 1
+      doFlicker();
+      setTimeout(() => {
+        if (!isRunning) return;
+        setGlitchActive(false);
+      }, 35);
+
+      // Flicker 2
+      setTimeout(() => {
+        if (!isRunning) return;
+        doFlicker();
+        setTimeout(() => {
+          if (!isRunning) return;
+          setGlitchActive(false);
+        }, 35);
+      }, 65);
+
+      // Flicker 3
+      setTimeout(() => {
+        if (!isRunning) return;
+        doFlicker();
+        setTimeout(() => {
+          if (!isRunning) return;
+          setGlitchActive(false);
+        }, 35);
+      }, 130);
+
+      // Flicker 4 & Clean Restoration
+      setTimeout(() => {
+        if (!isRunning) return;
+        doFlicker();
+        setTimeout(() => {
+          if (!isRunning) return;
+          setGlitchActive(false);
+          restoreAllChars();
+
+          // Schedule next glitch with rapid short random interval (350ms - 900ms)
+          if (isRunning) {
+            const nextInterval = Math.floor(Math.random() * 550) + 350;
+            timeoutId = setTimeout(trigger4FlickerGlitch, nextInterval);
+          }
+        }, 40);
+      }, 190);
+    };
+
+    // First rapid glitch starts right after initial cascade
+    timeoutId = setTimeout(trigger4FlickerGlitch, 550);
+
+    return () => {
+      isRunning = false;
+      clearTimeout(timeoutId);
+    };
   }, [title]);
 
   const renderWord = (word: string, wIdx: number, baseIdx: number) => {

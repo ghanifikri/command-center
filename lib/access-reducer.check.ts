@@ -2,8 +2,12 @@
  * Runnable self-check for the access state machine.
  * Run: npx tsx lib/access-reducer.check.ts
  */
-import { accessReducer, initialAccessState, type AccessAction } from "./access-reducer";
 import { ACCESS_PIN } from "../data/event";
+import {
+  accessReducer,
+  initialAccessState,
+  type AccessAction,
+} from "./access-reducer";
 
 function drive(actions: AccessAction[]) {
   return actions.reduce(accessReducer, initialAccessState);
@@ -29,12 +33,15 @@ const happy = drive([
   { type: "TO_EVENT" },
   { type: "TO_CINEMATIC" },
 ]);
-check("happy path reaches cinematic", happy.state === "cinematic" && happy.dialogOpen === false);
+check(
+  "happy path reaches cinematic",
+  happy.state === "cinematic" && happy.dialogOpen === false,
+);
 
 // Wrong PIN: verify → denied → auto-retry clears pin back to 'pin'.
 const wrong = drive([
   { type: "OPEN_MODAL" },
-  { type: "SET_PIN", pin: "111111" },
+  { type: "SET_PIN", pin: "000000" },
   { type: "VERIFY" },
   { type: "DENIED" },
   { type: "RETRY" },
@@ -53,8 +60,14 @@ const noop3 = driverOpenThenClose();
 function driverOpenThenClose() {
   return drive([{ type: "OPEN_MODAL" }, { type: "CLOSE_MODAL" }]);
 }
-check("close returns to landing", noop3.state === "landing" && noop3.dialogOpen === false);
-const noop4 = drive([{ type: "OPEN_MODAL" }, { type: "SET_PIN", pin: "123456789" }]);
+check(
+  "close returns to landing",
+  noop3.state === "landing" && noop3.dialogOpen === false,
+);
+const noop4 = drive([
+  { type: "OPEN_MODAL" },
+  { type: "SET_PIN", pin: "123456789" },
+]);
 check("pin is capped at six digits", noop4.pin === "");
 const noop5 = drive([
   { type: "OPEN_MODAL" },

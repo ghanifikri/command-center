@@ -15,7 +15,7 @@ export const event = {
   tagline: "A New Chapter of Integrated Excellence",
 } as const;
 
-export const ACCESS_PIN = "111111";
+export const ACCESS_PIN = "000000";
 
 export const access = {
   enabled: true,
@@ -103,14 +103,14 @@ export const activation = {
   init: "INITIALIZING COMMAND CENTER",
   config: activationConfig,
   systems: [
-    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 100 },
-    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 100 },
-    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 100 },
-    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 100 },
-    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 100 },
-    { label: "AI", dots: 10, status: "ONLINE", durationMs: 100 },
+    { label: "NETWORK", dots: 5, status: "ONLINE", durationMs: 1000 },
+    { label: "SECURITY", dots: 16, status: "ONLINE", durationMs: 1200 },
+    { label: "MONITORING", dots: 14, status: "ONLINE", durationMs: 300 },
+    { label: "COMMUNICATION", dots: 12, status: "ONLINE", durationMs: 700 },
+    { label: "SYSTEM", dots: 16, status: "ONLINE", durationMs: 4000 },
+    { label: "AI", dots: 10, status: "ONLINE", durationMs: 2000 },
   ] as const,
-  ready: "ALL SYSTEMS READY", 
+  ready: "ALL SYSTEMS READY",
 } as const;
 
 export const eventHero = {
@@ -154,7 +154,11 @@ export const journey = {
     { title: "Installation", date: "", desc: "Pemasangan infrastruktur" },
     { title: "Integration", date: "", desc: "Integrasi sistem" },
     { title: "Commissioning", date: "", desc: "Uji fungsi dan kesiapan" },
-    { title: "Inauguration", date: event.date, desc: "Peresmian Gedung Command Center" },
+    {
+      title: "Inauguration",
+      date: event.date,
+      desc: "Peresmian Gedung Command Center",
+    },
   ],
 } as const;
 
