@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Zap, Cpu, Power } from "lucide-react";
+import { Zap, Cpu, Fingerprint } from "lucide-react";
 import { secureAccess, event } from "@/data/event";
 import { useAccess } from "@/lib/access-machine";
 import { useSound } from "@/lib/sound";
@@ -145,7 +145,7 @@ export default function GrandLaunchButton({ onLaunch }: Props) {
             className="pointer-events-none absolute h-36 w-36 rounded-full border-2 border-[#FFD700]/60 shadow-[0_0_25px_rgba(255,215,0,0.3)]"
           />
 
-          {/* The Big High-Tech Launch Core Button */}
+          {/* The Big High-Tech Launch Core Button (Biometric Fingerprint Scanner) */}
           <motion.button
             type="button"
             onClick={handleTriggerLaunch}
@@ -173,11 +173,31 @@ export default function GrandLaunchButton({ onLaunch }: Props) {
               className="pointer-events-none absolute inset-0 rounded-full border border-[#00E5A0]"
             />
 
-            {/* Glowing Icon in the center */}
+            {/* Glowing Biometric Fingerprint Scanner in the center */}
             <div className="relative flex flex-col items-center justify-center">
-              <Power className={cn("h-10 w-10 transition-transform duration-300 group-hover:scale-110", isLaunching ? "animate-spin text-[#050A0F]" : "text-[#00E5A0] group-hover:text-white drop-shadow-[0_0_15px_#00E5A0]")} />
-              <span className="mt-1 font-mono text-[0.62rem] font-black tracking-widest uppercase">
-                {isLaunching ? "LAUNCHING" : "ENTER"}
+              <div className="relative flex items-center justify-center">
+                <Fingerprint
+                  className={cn(
+                    "h-12 w-12 transition-transform duration-300 group-hover:scale-110",
+                    isLaunching
+                      ? "animate-pulse text-[#050A0F]"
+                      : "text-[#00E5A0] group-hover:text-white drop-shadow-[0_0_18px_#00E5A0]"
+                  )}
+                />
+                {/* Biometric Laser Scanning Beam */}
+                <motion.div
+                  aria-hidden="true"
+                  initial={{ top: "0%", opacity: 0 }}
+                  animate={{
+                    top: ["0%", "100%", "0%"],
+                    opacity: isLaunching ? [0, 1, 0] : [0.2, 0.9, 0.2],
+                  }}
+                  transition={{ repeat: Infinity, duration: 1.6, ease: "easeInOut" }}
+                  className="pointer-events-none absolute inset-x-0 h-0.5 bg-[#00E5A0] shadow-[0_0_10px_#00E5A0]"
+                />
+              </div>
+              <span className="mt-1 font-mono text-[0.58rem] font-black tracking-widest uppercase">
+                {isLaunching ? "SCANNING..." : "SCAN / RESMIKAN"}
               </span>
             </div>
           </motion.button>

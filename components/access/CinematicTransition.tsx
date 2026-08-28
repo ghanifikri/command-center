@@ -169,7 +169,7 @@ export default function CinematicTransition() {
             </video>
           )}
 
-          {videoPhase === "drone" && (
+          {(videoPhase === "drone" || videoPhase === "done") && (
             <video
               ref={videoRef}
               className="w-full h-full object-cover"
@@ -180,7 +180,9 @@ export default function CinematicTransition() {
               onEnded={(e) => {
                 const video = e.currentTarget;
                 video.pause();
-                video.currentTime = video.duration - 0.1;
+                try {
+                  video.currentTime = Math.max(0, video.duration - 0.05);
+                } catch {}
                 setVideoPhase("done");
               }}
             >
