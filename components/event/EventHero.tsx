@@ -8,80 +8,233 @@ import { easeOut, EASE } from "@/lib/motion";
 
 const GLYPHS = "010101KTI#$<>[]{}/*+=!~_?%&01924ABCDEF";
 
-function HackerGlitchChar({
-  targetChar,
-  charIndex,
-}: {
-  targetChar: string;
-  charIndex: number;
-}) {
-  const [displayChar, setDisplayChar] = useState(targetChar);
-  const [isDecrypted, setIsDecrypted] = useState(false);
-  const [isGlitching, setIsGlitching] = useState(false);
+/**
+ * High-Impact Cyberpunk RGB Split Glitch & Hacker Decryption Title System
+ */
+function CyberRGBGlitchTitle({ title }: { title: string }) {
+  const words = title.split(" ");
+  const [scrambleMap, setScrambleMap] = useState<Record<string, string>>({});
+  const [decryptedMap, setDecryptedMap] = useState<Record<string, boolean>>({});
+  const [glitchActive, setGlitchActive] = useState(false);
+  const [glitchSliceTop, setGlitchSliceTop] = useState("25%");
+  const [glitchSliceHeight, setGlitchSliceHeight] = useState("30%");
 
+  // 1. Initial Hacker Decryption Scramble Cascade
   useEffect(() => {
-    let frame = 0;
-    const totalFrames = 10;
-    const startDelay = 180 + charIndex * 40;
+    let globalIndex = 0;
+    words.forEach((word) => {
+      word.split("").forEach((char) => {
+        const key = `${globalIndex}`;
+        const charIndex = globalIndex;
+        globalIndex++;
 
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        if (frame < totalFrames) {
-          setDisplayChar(GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
-          frame++;
-        } else {
-          setDisplayChar(targetChar);
-          setIsDecrypted(true);
-          clearInterval(interval);
-        }
-      }, 35);
-    }, startDelay);
+        let frame = 0;
+        const totalFrames = 8;
+        const startDelay = 120 + charIndex * 35;
 
-    return () => clearTimeout(timer);
-  }, [targetChar, charIndex]);
+        setTimeout(() => {
+          const interval = setInterval(() => {
+            if (frame < totalFrames) {
+              setScrambleMap((prev) => ({
+                ...prev,
+                [key]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+              }));
+              frame++;
+            } else {
+              setScrambleMap((prev) => ({ ...prev, [key]: char }));
+              setDecryptedMap((prev) => ({ ...prev, [key]: true }));
+              clearInterval(interval);
+            }
+          }, 30);
+        }, startDelay);
+      });
+    });
+  }, [title]);
 
-  // Periodic subtle cyber glitch pulse
+  // 2. High-Frequency Cyber RGB Glitch Spasm Engine
   useEffect(() => {
-    if (!isDecrypted) return;
-    const glitchInterval = setInterval(() => {
-      if (Math.random() < 0.25) {
-        setIsGlitching(true);
-        setTimeout(() => setIsGlitching(false), 90);
-      }
-    }, 2200 + (charIndex % 3) * 600);
-    return () => clearInterval(glitchInterval);
-  }, [isDecrypted, charIndex]);
+    const triggerGlitch = () => {
+      const top = Math.floor(Math.random() * 60) + 10;
+      const height = Math.floor(Math.random() * 35) + 15;
+      setGlitchSliceTop(`${top}%`);
+      setGlitchSliceHeight(`${height}%`);
+      setGlitchActive(true);
+
+      // Random temporary letter scramble on 1-2 random characters during glitch
+      const totalChars = title.replace(/\s+/g, "").length;
+      const randomChar1 = `${Math.floor(Math.random() * totalChars)}`;
+      const randomChar2 = `${Math.floor(Math.random() * totalChars)}`;
+      setScrambleMap((prev) => ({
+        ...prev,
+        [randomChar1]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+        [randomChar2]: GLYPHS[Math.floor(Math.random() * GLYPHS.length)],
+      }));
+
+      // End glitch after 130ms
+      setTimeout(() => {
+        setGlitchActive(false);
+        // Restore characters
+        let idx = 0;
+        const restored: Record<string, string> = {};
+        words.forEach((w) => {
+          w.split("").forEach((c) => {
+            restored[`${idx}`] = c;
+            idx++;
+          });
+        });
+        setScrambleMap(restored);
+      }, 130);
+    };
+
+    // Frequent rhythmic glitch bursts every 1.7s
+    const interval = setInterval(() => {
+      triggerGlitch();
+    }, 1700);
+
+    return () => clearInterval(interval);
+  }, [title]);
+
+  const renderWord = (word: string, wIdx: number, baseIdx: number) => {
+    return (
+      <div key={`${word}-${wIdx}`} className="flex items-center justify-center overflow-visible">
+        {word.split("").map((realChar, cIdx) => {
+          const charKey = `${baseIdx + cIdx}`;
+          const isDec = decryptedMap[charKey] ?? false;
+          const displayChar =
+            scrambleMap[charKey] ??
+            (isDec ? realChar : GLYPHS[Math.floor(Math.random() * GLYPHS.length)]);
+
+          return (
+            <span
+              key={`${charKey}-${realChar}`}
+              className="inline-block font-display text-[clamp(3.2rem,10.5vw,7.6rem)] font-black uppercase leading-[0.92] tracking-[0.06em]"
+            >
+              {displayChar}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
+  let gIdx = 0;
 
   return (
-    <motion.span
-      initial={{
-        opacity: 0,
-        y: 30,
-        scale: 0.85,
-        filter: "blur(6px)",
-      }}
-      animate={{
-        opacity: 1,
-        y: 0,
-        scale: isGlitching ? [1, 1.05, 0.97, 1] : 1,
-        filter: "blur(0px)",
-        x: isGlitching ? [-2, 3, -1, 0] : 0,
-      }}
-      transition={{
-        duration: 0.5,
-        delay: 0.2 + charIndex * 0.045,
-        ease: [0.215, 0.61, 0.355, 1],
-      }}
-      className={`inline-block font-display text-[clamp(3.2rem,10.5vw,7.6rem)] font-black uppercase leading-[0.92] tracking-[0.06em] select-none transition-colors duration-100 ${
-        !isDecrypted
-          ? "text-[#00D4FF] drop-shadow-[0_0_25px_#00D4FF]"
-          : isGlitching
-          ? "text-[#00E5A0] drop-shadow-[3px_0_0_#00D4FF,-3px_0_0_#FF0055]"
-          : "bg-gradient-to-b from-[#FFFFFF] via-[#E8F4FA] to-[#8FA7B8] bg-clip-text text-transparent drop-shadow-[0_0_35px_rgba(0,212,255,0.35)]"
-      }`}
-    >
-      {displayChar}
-    </motion.span>
+    <div className="relative flex flex-col items-center justify-center select-none overflow-visible my-3">
+      {/* Anamorphic Laser Flare Beam Sweeping Across Title */}
+      <motion.div
+        aria-hidden="true"
+        initial={{ left: "-40%", opacity: 0 }}
+        animate={{ left: "140%", opacity: [0, 1, 1, 0] }}
+        transition={{ duration: 1.8, delay: 0.25, ease: "easeInOut" }}
+        className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] w-80 bg-gradient-to-r from-transparent via-[#00D4FF] via-white to-transparent blur-[1px] shadow-[0_0_25px_#00D4FF] z-30"
+      />
+
+      {/* =======================================================================
+          RGB LAYER 1: RED/MAGENTA ABERRATION CHANNEL (Offset Left)
+         ======================================================================= */}
+      <div
+        aria-hidden="true"
+        className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[#FF0055] transition-transform duration-75 z-10 ${
+          glitchActive ? "opacity-90 -translate-x-[6px] translate-y-[2px]" : "opacity-0"
+        }`}
+        style={{
+          clipPath: glitchActive
+            ? `polygon(0 ${glitchSliceTop}, 100% ${glitchSliceTop}, 100% calc(${glitchSliceTop} + ${glitchSliceHeight}), 0 calc(${glitchSliceTop} + ${glitchSliceHeight}))`
+            : undefined,
+          filter: "drop-shadow(0 0 15px rgba(255,0,85,0.9))",
+        }}
+      >
+        {words.map((w, i) => {
+          const bIdx = gIdx;
+          gIdx += w.length;
+          return renderWord(w, i, bIdx);
+        })}
+      </div>
+
+      {/* =======================================================================
+          RGB LAYER 2: CYAN ABERRATION CHANNEL (Offset Right)
+         ======================================================================= */}
+      {(() => {
+        let gIdx2 = 0;
+        return (
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[#00D4FF] transition-transform duration-75 z-10 ${
+              glitchActive ? "opacity-90 translate-x-[6px] -translate-y-[1px]" : "opacity-0"
+            }`}
+            style={{
+              clipPath: glitchActive
+                ? `polygon(0 calc(${glitchSliceTop} + 15%), 100% calc(${glitchSliceTop} + 15%), 100% calc(${glitchSliceTop} + ${glitchSliceHeight} + 20%), 0 calc(${glitchSliceTop} + ${glitchSliceHeight} + 20%))`
+                : undefined,
+              filter: "drop-shadow(0 0 15px rgba(0,212,255,0.9))",
+            }}
+          >
+            {words.map((w, i) => {
+              const bIdx = gIdx2;
+              gIdx2 += w.length;
+              return renderWord(w, i, bIdx);
+            })}
+          </div>
+        );
+      })()}
+
+      {/* =======================================================================
+          RGB LAYER 3: GREEN / EMERALD SCAN GLITCH CHANNEL (Jitter)
+         ======================================================================= */}
+      {(() => {
+        let gIdx3 = 0;
+        return (
+          <div
+            aria-hidden="true"
+            className={`pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-[#00E5A0] transition-transform duration-75 z-10 ${
+              glitchActive ? "opacity-80 translate-x-[2px] translate-y-[3px]" : "opacity-0"
+            }`}
+            style={{
+              clipPath: glitchActive
+                ? `polygon(0 0, 100% 0, 100% ${glitchSliceTop}, 0 ${glitchSliceTop})`
+                : undefined,
+              filter: "drop-shadow(0 0 12px rgba(0,229,160,0.8))",
+            }}
+          >
+            {words.map((w, i) => {
+              const bIdx = gIdx3;
+              gIdx3 += w.length;
+              return renderWord(w, i, bIdx);
+            })}
+          </div>
+        );
+      })()}
+
+      {/* =======================================================================
+          PRIMARY MAIN LAYER: Crisp Metallic Silver / Cyan Core Text
+         ======================================================================= */}
+      {(() => {
+        let gIdx4 = 0;
+        return (
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            animate={{
+              opacity: 1,
+              y: 0,
+              x: glitchActive ? [-2, 3, -1, 0] : 0,
+            }}
+            transition={{ duration: 0.6, ease: easeOut }}
+            className={`relative z-20 flex flex-col items-center justify-center text-transparent bg-clip-text ${
+              glitchActive
+                ? "bg-gradient-to-b from-[#FFFFFF] via-[#00D4FF] to-[#FFFFFF] drop-shadow-[0_0_40px_rgba(0,212,255,0.8)]"
+                : "bg-gradient-to-b from-[#FFFFFF] via-[#E8F4FA] to-[#8FA7B8] drop-shadow-[0_0_35px_rgba(0,212,255,0.35)]"
+            }`}
+          >
+            {words.map((w, i) => {
+              const bIdx = gIdx4;
+              gIdx4 += w.length;
+              return renderWord(w, i, bIdx);
+            })}
+          </motion.div>
+        );
+      })()}
+    </div>
   );
 }
 
@@ -294,38 +447,8 @@ export default function EventHero() {
         <Sparkles className="h-4 w-4 text-[#FFD700] animate-pulse" />
       </motion.div>
 
-      {/* Main Title: Letter-by-Letter Cinematic Laser Reveal */}
-      <div className="relative z-10 my-3 overflow-visible">
-        {/* Anamorphic Laser Flare Beam Sweeping Across Title */}
-        <motion.div
-          aria-hidden="true"
-          initial={{ left: "-40%", opacity: 0 }}
-          animate={{ left: "140%", opacity: [0, 1, 1, 0] }}
-          transition={{ duration: 1.8, delay: 0.25, ease: "easeInOut" }}
-          className="pointer-events-none absolute top-1/2 -translate-y-1/2 h-[3px] w-80 bg-gradient-to-r from-transparent via-[#00D4FF] via-white to-transparent blur-[1px] shadow-[0_0_25px_#00D4FF] z-30"
-        />
-
-        <div className="relative flex flex-col items-center justify-center select-none overflow-visible">
-          {eventHero.title.split(" ").map((word, wIdx, arr) => {
-            // Calculate base index for stagger timing
-            const baseCharIndex = wIdx === 0 ? 0 : arr[0].length;
-            return (
-              <div key={`${word}-${wIdx}`} className="flex items-center justify-center overflow-visible">
-                {word.split("").map((char, cIdx) => {
-                  const charIndex = baseCharIndex + cIdx;
-                  return (
-                    <HackerGlitchChar
-                      key={`${word}-${char}-${charIndex}`}
-                      targetChar={char}
-                      charIndex={charIndex}
-                    />
-                  );
-                })}
-              </div>
-            );
-          })}
-        </div>
-      </div>
+      {/* Main Title: Full Multi-Layer Cyberpunk RGB Glitch & Hacker Decryption */}
+      <CyberRGBGlitchTitle title={eventHero.title} />
 
       {/* Prestigious Company Ribbon */}
       <motion.div
