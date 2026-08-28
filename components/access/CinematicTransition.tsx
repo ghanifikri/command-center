@@ -61,15 +61,16 @@ function CenterpieceContent() {
 /**
  * Sleek Minimalist Executive Gate & Cinematic Reveal:
  * - The text & elements physically split down the center and slide open WITH the gate!
- * - High-intensity radiant light burst / lens flare transition as the gate opens
- * - Smooth luxury dissipation from light into the Airo-Airi video
+ * - Clean, lightweight, high-performance white light flash transition (zero lag)
+ * - Smooth luxury dissolve from pure white into the Airo-Airi video
  */
 export default function CinematicTransition() {
   const { state } = useAccess();
   const sound = useSound();
   const armed = useRef(false);
   const [doorOpen, setDoorOpen] = useState(false);
-  const [lightPhase, setLightPhase] = useState<"idle" | "burst" | "dissolve" | "hidden">("idle");
+  const [flashActive, setFlashActive] = useState(false);
+  const [flashDissolve, setFlashDissolve] = useState(false);
   const [videoPhase, setVideoPhase] = useState<"airo" | "drone" | "done">("airo");
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -83,17 +84,16 @@ export default function CinematicTransition() {
       sound.playVoice("future");
     }, 250);
 
-    // 2. Vault Doors Smooth Architectural Open & Light Burst Ignition (at 2.3s)
+    // 2. Vault Doors Open & Clean White Flash In (at 2.3s)
     const doorTimer = window.setTimeout(() => {
       setDoorOpen(true);
-      setLightPhase("burst");
+      setFlashActive(true);
       sound.play("gateDecompress");
-      sound.play("launchIgnite");
     }, 2300);
 
-    // 3. Video starts playing and light begins smooth dissolve (at 3.2s)
+    // 3. Video starts playing & White Flash smoothly dissolves out (at 2.9s)
     const playTimer = window.setTimeout(() => {
-      setLightPhase("dissolve");
+      setFlashDissolve(true);
       const video = videoRef.current;
       if (!video) return;
       video.currentTime = 0;
@@ -101,22 +101,22 @@ export default function CinematicTransition() {
       if (playPromise !== undefined) {
         playPromise.catch(() => {
           video.muted = true;
-          video.play().catch(() => { });
+          video.play().catch(() => {});
         });
       }
-    }, 3200);
+    }, 2900);
 
-    // 4. Light transition complete, fully clear (at 4.6s)
-    const lightEndTimer = window.setTimeout(() => {
-      setLightPhase("hidden");
-    }, 4600);
+    // 4. Clean up flash state when complete (at 3.9s)
+    const flashEndTimer = window.setTimeout(() => {
+      setFlashActive(false);
+    }, 3900);
 
     return () => {
       armed.current = false;
       window.clearTimeout(voiceTimer);
       window.clearTimeout(doorTimer);
       window.clearTimeout(playTimer);
-      window.clearTimeout(lightEndTimer);
+      window.clearTimeout(flashEndTimer);
     };
   }, [sound]);
 
@@ -131,12 +131,10 @@ export default function CinematicTransition() {
     if (playPromise !== undefined) {
       playPromise.catch(() => {
         video.muted = true;
-        video.play().catch(() => { });
+        video.play().catch(() => {});
       });
     }
   }, [videoPhase]);
-
-  const showLight = lightPhase === "burst" || lightPhase === "dissolve";
 
   return (
     <AnimatePresence>
@@ -194,36 +192,34 @@ export default function CinematicTransition() {
         </div>
 
         {/* =======================================================================
-            LAYER 1: Under-Door Volumetric Light Eruption (Spills out between doors)
+            LAYER 1: Center Opening White Light (Pours through the center gap as gate opens)
            ======================================================================= */}
-        {showLight && (
+        {flashActive && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center overflow-hidden">
-            {/* Core Vertical Energy Pillar emerging through the crack */}
+            {/* Pure white light behind the parting doors */}
             <motion.div
-              initial={{ scaleX: 0.05, opacity: 0 }}
+              initial={{ opacity: 0 }}
               animate={{
-                scaleX: lightPhase === "burst" ? [0.05, 3, 15] : 20,
-                opacity: lightPhase === "burst" ? [0, 1, 0.9] : 0,
+                opacity: flashDissolve ? 0 : 1,
               }}
               transition={{
-                duration: lightPhase === "burst" ? 0.9 : 1.4,
+                duration: flashDissolve ? 0.8 : 0.3,
                 ease: "easeOut",
               }}
-              className="absolute inset-y-0 w-32 bg-gradient-to-r from-transparent via-[#00D4FF]/80 via-white to-transparent blur-xl"
+              className="absolute inset-0 bg-white"
             />
-
-            {/* Radiant Expanding Bloom Disc */}
+            {/* Bright Center Vertical Beam at the opening seam */}
             <motion.div
-              initial={{ scale: 0.1, opacity: 0 }}
+              initial={{ scaleX: 0.1, opacity: 0 }}
               animate={{
-                scale: lightPhase === "burst" ? [0.1, 1.6, 2.8] : 3.5,
-                opacity: lightPhase === "burst" ? [0, 1, 0.85] : 0,
+                scaleX: flashDissolve ? 1.5 : [0.1, 0.6, 1],
+                opacity: flashDissolve ? 0 : [0, 1, 0.9],
               }}
               transition={{
-                duration: lightPhase === "burst" ? 1.0 : 1.4,
+                duration: flashDissolve ? 0.75 : 0.5,
                 ease: "easeOut",
               }}
-              className="absolute h-[700px] w-[700px] rounded-full bg-[radial-gradient(circle_at_center,rgba(255,255,255,1)_0%,rgba(0,212,255,0.85)_25%,rgba(92,255,208,0.5)_50%,transparent_75%)] blur-[60px]"
+              className="absolute inset-y-0 w-3/4 bg-gradient-to-r from-transparent via-white via-white to-transparent"
             />
           </div>
         )}
@@ -236,7 +232,7 @@ export default function CinematicTransition() {
           <motion.div
             initial={{ x: 0 }}
             animate={{ x: doorOpen ? "-101%" : 0 }}
-            transition={{ duration: 1.4, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 1.3, ease: [0.76, 0, 0.24, 1] }}
             className="relative h-full w-1/2 bg-[#05080C] border-r border-white/10 shadow-[20px_0_60px_rgba(0,0,0,0.9)] overflow-hidden"
           >
             {/* Left-half cropped viewport container (anchored at left: 0) */}
@@ -254,7 +250,7 @@ export default function CinematicTransition() {
           <motion.div
             initial={{ x: 0 }}
             animate={{ x: doorOpen ? "101%" : 0 }}
-            transition={{ duration: 1.4, ease: [0.76, 0, 0.24, 1] }}
+            transition={{ duration: 1.3, ease: [0.76, 0, 0.24, 1] }}
             className="relative h-full w-1/2 bg-[#05080C] border-l border-white/10 shadow-[-20px_0_60px_rgba(0,0,0,0.9)] overflow-hidden"
           >
             {/* Right-half cropped viewport container (offset by -50vw so center matches left border) */}
@@ -277,75 +273,6 @@ export default function CinematicTransition() {
             />
           )}
         </div>
-
-        {/* =======================================================================
-            LAYER 3: Foreground Cinematic Optical Light Flare & Screen-wide Flash
-           ======================================================================= */}
-        {showLight && (
-          <div className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center overflow-hidden">
-            {/* Primary Anamorphic Horizontal Lens Flare Streak */}
-            <motion.div
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{
-                scaleX: lightPhase === "burst" ? [0, 1.2, 1.5] : 2,
-                opacity: lightPhase === "burst" ? [0, 1, 0.95] : 0,
-              }}
-              transition={{
-                duration: lightPhase === "burst" ? 0.85 : 1.3,
-                ease: "easeOut",
-              }}
-              className="absolute h-[6px] w-[140vw] bg-gradient-to-r from-transparent via-[#00D4FF] via-white to-transparent blur-[2px] shadow-[0_0_50px_#00D4FF,0_0_100px_#FFFFFF]"
-            />
-
-            {/* Secondary Golden/Cyan Razor Flare Line */}
-            <motion.div
-              initial={{ scaleX: 0, opacity: 0 }}
-              animate={{
-                scaleX: lightPhase === "burst" ? [0, 1, 1.3] : 1.8,
-                opacity: lightPhase === "burst" ? [0, 0.85, 0.7] : 0,
-              }}
-              transition={{
-                duration: lightPhase === "burst" ? 0.9 : 1.2,
-                delay: 0.05,
-                ease: "easeOut",
-              }}
-              className="absolute h-[2px] w-[110vw] bg-gradient-to-r from-transparent via-[#FFE57F]/90 via-[#00E5A0] to-transparent blur-[1px]"
-            />
-
-            {/* Dynamic Volumetric God Rays (Rotating Shards of Light) */}
-            <motion.div
-              initial={{ scale: 0.2, rotate: 0, opacity: 0 }}
-              animate={{
-                scale: lightPhase === "burst" ? [0.2, 1.4, 2] : 2.6,
-                rotate: lightPhase === "burst" ? 15 : 35,
-                opacity: lightPhase === "burst" ? [0, 0.9, 0.75] : 0,
-              }}
-              transition={{
-                duration: lightPhase === "burst" ? 1.0 : 1.4,
-                ease: "easeOut",
-              }}
-              className="absolute h-[900px] w-[900px] mix-blend-screen opacity-80"
-              style={{
-                background:
-                  "conic-gradient(from 0deg at 50% 50%, rgba(255,255,255,0.9) 0deg, transparent 25deg, rgba(0,212,255,0.7) 45deg, transparent 70deg, rgba(255,255,255,0.85) 90deg, transparent 120deg, rgba(92,255,208,0.7) 140deg, transparent 175deg, rgba(255,255,255,0.9) 195deg, transparent 220deg, rgba(0,212,255,0.7) 240deg, transparent 270deg, rgba(255,255,255,0.85) 300deg, transparent 330deg, rgba(92,255,208,0.6) 350deg, rgba(255,255,255,0.9) 360deg)",
-                filter: "blur(20px)",
-              }}
-            />
-
-            {/* Fullscreen Luminous Radiant Light Bath (Blinding Light Breakthrough) */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{
-                opacity: lightPhase === "burst" ? [0, 0.95, 0.85] : 0,
-              }}
-              transition={{
-                duration: lightPhase === "burst" ? 0.75 : 1.3,
-                ease: "easeOut",
-              }}
-              className="absolute inset-0 bg-gradient-to-b from-white/30 via-[#00D4FF]/25 to-white/40 backdrop-blur-[3px]"
-            />
-          </div>
-        )}
       </motion.div>
     </AnimatePresence>
   );
