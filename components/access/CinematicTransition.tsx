@@ -71,7 +71,7 @@ export default function CinematicTransition() {
   const [doorOpen, setDoorOpen] = useState(false);
   const [flashActive, setFlashActive] = useState(false);
   const [flashDissolve, setFlashDissolve] = useState(false);
-  const [videoPhase, setVideoPhase] = useState<"airo" | "drone" | "done">("airo");
+  const [videoPhase, setVideoPhase] = useState<"playing" | "done">("playing");
   const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -120,22 +120,6 @@ export default function CinematicTransition() {
     };
   }, [sound]);
 
-  // Ensure next video (drone) plays immediately when transitioned
-  useEffect(() => {
-    if (videoPhase !== "drone") return;
-    const video = videoRef.current;
-    if (!video) return;
-
-    video.currentTime = 0;
-    const playPromise = video.play();
-    if (playPromise !== undefined) {
-      playPromise.catch(() => {
-        video.muted = true;
-        video.play().catch(() => {});
-      });
-    }
-  }, [videoPhase]);
-
   return (
     <AnimatePresence>
       <motion.div
@@ -148,47 +132,29 @@ export default function CinematicTransition() {
         aria-hidden="true"
       >
         {/* =======================================================================
-            LAYER 0: The Live Video Screen (Pre-rendered Frame 0 on Standby)
+            LAYER 0: The Live Video Screen (airo-airi.mp4, freezes on final frame)
            ======================================================================= */}
         <div className="absolute inset-0 flex items-center justify-center overflow-hidden bg-black z-0">
-          {videoPhase === "airo" && (
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              playsInline
-              preload="auto"
-              disablePictureInPicture
-              onLoadedMetadata={(e) => {
-                e.currentTarget.currentTime = 0.001;
-              }}
-              onEnded={() => {
-                setVideoPhase("drone");
-              }}
-            >
-              <source src="/video/airo-airi.mp4#t=0.001" type="video/mp4" />
-            </video>
-          )}
-
-          {(videoPhase === "drone" || videoPhase === "done") && (
-            <video
-              ref={videoRef}
-              className="w-full h-full object-cover"
-              playsInline
-              muted
-              preload="auto"
-              disablePictureInPicture
-              onEnded={(e) => {
-                const video = e.currentTarget;
-                video.pause();
-                try {
-                  video.currentTime = Math.max(0, video.duration - 0.05);
-                } catch {}
-                setVideoPhase("done");
-              }}
-            >
-              <source src="/video/command-center-drone-ai.mp4" type="video/mp4" />
-            </video>
-          )}
+          <video
+            ref={videoRef}
+            className="w-full h-full object-cover"
+            playsInline
+            preload="auto"
+            disablePictureInPicture
+            onLoadedMetadata={(e) => {
+              e.currentTarget.currentTime = 0.001;
+            }}
+            onEnded={(e) => {
+              const video = e.currentTarget;
+              video.pause();
+              try {
+                video.currentTime = Math.max(0, video.duration - 0.05);
+              } catch {}
+              setVideoPhase("done");
+            }}
+          >
+            <source src="/video/airo-airi.mp4#t=0.001" type="video/mp4" />
+          </video>
 
           <div className="absolute inset-0 bg-gradient-to-t from-[#05080C]/70 via-transparent to-[#05080C]/50 pointer-events-none" />
         </div>
