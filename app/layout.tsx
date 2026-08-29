@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import ProviderTree from "@/components/ProviderTree";
@@ -14,6 +14,15 @@ const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  minimumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://peresmian-command-center.vercel.app"),
@@ -38,10 +47,10 @@ export default function RootLayout({
   return (
     <html
       lang="id"
-      className={`${inter.variable} ${spaceGrotesk.variable} h-full`}
+      className={`${inter.variable} ${spaceGrotesk.variable} h-full select-none overscroll-none touch-manipulation`}
       suppressHydrationWarning
     >
-      <body className="min-h-full bg-[#050A0F] text-[#F5F7FA]">
+      <body className="min-h-full bg-[#050A0F] text-[#F5F7FA] select-none overscroll-none touch-manipulation">
         <ProviderTree>{children}</ProviderTree>
       </body>
     </html>

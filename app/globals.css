@@ -20,6 +20,8 @@ html {
   background: #050a0f;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 body {
@@ -30,6 +32,8 @@ body {
   text-rendering: optimizeLegibility;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
+  overscroll-behavior: none;
+  touch-action: manipulation;
 }
 
 /* Global scrollbar hiding for WebKit (Chrome, Safari, Edge, Opera) */
@@ -42,11 +46,22 @@ body {
 * {
   -ms-overflow-style: none !important;
   scrollbar-width: none !important;
+  -webkit-touch-callout: none !important; /* Disables iOS long-press callout */
+  -webkit-user-select: none !important;   /* Safari & WebKit */
+  -moz-user-select: none !important;      /* Firefox */
+  -ms-user-select: none !important;       /* Edge/IE */
+  user-select: none !important;           /* Standard */
+  -webkit-tap-highlight-color: transparent !important; /* Disable blue/gray tap highlight */
+}
+
+/* Prevent image, media, and anchor dragging */
+img, a, video, svg {
+  -webkit-user-drag: none !important;
 }
 
 ::selection {
-  background: #00d4ff;
-  color: #050a0f;
+  background: transparent;
+  color: inherit;
 }
 
 :focus-visible {
