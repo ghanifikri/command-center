@@ -41,7 +41,7 @@ check(
 // Wrong PIN: verify → denied → auto-retry clears pin back to 'pin'.
 const wrong = drive([
   { type: "OPEN_MODAL" },
-  { type: "SET_PIN", pin: "000000" },
+  { type: "SET_PIN", pin: "290826" },
   { type: "VERIFY" },
   { type: "DENIED" },
   { type: "RETRY" },

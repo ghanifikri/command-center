@@ -15,7 +15,7 @@ export const event = {
   tagline: "A New Chapter of Integrated Excellence",
 } as const;
 
-export const ACCESS_PIN = "000000";
+export const ACCESS_PIN = "290826";
 
 export const access = {
   enabled: true,

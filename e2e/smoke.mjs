@@ -52,7 +52,7 @@ await page
   .waitFor({ state: "visible", timeout: 5000 });
 
 // 3. Wrong PIN → denied → auto-reset
-for (const d of "000000".split("")) {
+for (const d of "290826".split("")) {
   await page.getByRole("button", { name: new RegExp(`^Digit ${d}$`) }).click();
 }
 await page.getByRole("button", { name: "Confirm access code" }).click();
